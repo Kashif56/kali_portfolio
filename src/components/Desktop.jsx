@@ -572,40 +572,50 @@ const Desktop = () => {
           <div className="w-full h-full flex flex-col bg-[#1e1e2e] rounded-md overflow-hidden shadow-2xl border border-[#30363d] relative">
             {/* Terminal header with controls */}
             <div 
-              className="flex items-center px-4 py-2 bg-[#0d1117] border-b border-[#30363d] cursor-move"
+              className="flex items-center h-8 border-b border-[#30363d] px-3 cursor-move"
+              style={{ backgroundColor: '#1a4971' }} /* Using dark blue for terminal */
               onMouseDown={(e) => handleStartDrag(e, 'terminal')}
             >
-              <div className="flex space-x-3">
+              {/* Window title - left aligned */}
+              <div className="flex-1 text-left text-sm font-mono text-white font-bold">
+                Terminal - root@kali
+              </div>
+              
+              {/* Window controls - right aligned */}
+              <div className="flex space-x-4">
+                {/* Minimize button with icon */}
                 <div 
-                  className="w-5 h-5 bg-red-500 rounded-full cursor-pointer hover:bg-red-600 flex items-center justify-center group relative"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent dragging when clicking button
-                    setShowTerminal(false);
-                  }}
-                >
-                  <span className="text-black font-bold text-xs">×</span>
-                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Close Terminal</span>
-                </div>
-                <div 
-                  className="w-5 h-5 bg-yellow-500 rounded-full cursor-pointer hover:bg-yellow-600 flex items-center justify-center group relative"
+                  className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent dragging when clicking button
                     setTerminalMinimized(!terminalMinimized);
                   }}
                 >
-                  <span className="text-black font-bold text-xs">_</span>
-                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Minimize Terminal</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Minimize Terminal</span>
                 </div>
-                <div className="w-5 h-5 bg-green-500 rounded-full"></div>
-              </div>
-              <div className="flex-1 text-center text-sm font-mono text-[#00ff00]">
-                Terminal - root@kali
+                
+                {/* Close button with icon */}
+                <div 
+                  className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent dragging when clicking button
+                    setShowTerminal(false);
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Close Terminal</span>
+                </div>
               </div>
             </div>
             
             {/* Terminal body */}
             {!terminalMinimized && (
-              <div className="flex-1">
+              <div className="flex-1 bg-black h-full">
                 <Terminal onCommandExecute={handleCommandExecute} />
               </div>
             )}
@@ -682,38 +692,44 @@ const Desktop = () => {
               {/* Content header with controls */}
               {/* Window title bar */}
               <div 
-                className="flex items-center h-8 border-b border-[#30363d] px-2 cursor-move" 
+                className="flex items-center h-8 border-b border-[#30363d] px-3 cursor-move" 
                 style={{ backgroundColor: windowColors[windowContent] || '#1e1e2e' }}
                 onMouseDown={(e) => handleStartDrag(e, windowContent)}
               >
-                {/* Window controls */}
-                <div className="flex space-x-2">
-                  {/* Close button with X symbol always visible */}
+                {/* Window title - left aligned */}
+                <div className="flex-1 text-left text-sm font-mono text-white font-bold">
+                  {windowContent.charAt(0).toUpperCase() + windowContent.slice(1)}
+                </div>
+                
+                {/* Window controls - right aligned */}
+                <div className="flex space-x-4">
+                  {/* Minimize button with icon */}
                   <div 
-                    className="w-5 h-5 bg-red-500 rounded-full cursor-pointer hover:bg-red-600 flex items-center justify-center group relative"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent dragging when clicking button
-                      handleCloseWindow(windowContent);
-                    }}
-                  >
-                    <span className="text-black font-bold text-xs">×</span>
-                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Close Window</span>
-                  </div>
-                  {/* Minimize button with _ symbol always visible */}
-                  <div 
-                    className="w-5 h-5 bg-yellow-500 rounded-full cursor-pointer hover:bg-yellow-600 flex items-center justify-center group relative"
+                    className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent dragging when clicking button
                       handleMinimizeWindow(windowContent);
                     }}
                   >
-                    <span className="text-black font-bold text-xs">_</span>
-                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Minimize Window</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Minimize Window</span>
                   </div>
-                  <div className="w-5 h-5 bg-green-500 rounded-full"></div>
-                </div>
-                <div className="flex-1 text-center text-sm font-mono text-white font-bold">
-                  {windowContent.charAt(0).toUpperCase() + windowContent.slice(1)}
+                  
+                  {/* Close button with icon */}
+                  <div 
+                    className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent dragging when clicking button
+                      handleCloseWindow(windowContent);
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Close Window</span>
+                  </div>
                 </div>
               </div>
               
