@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import projects from '../data/projects';
 import Notepad from './Notepad';
+// Import images from kashif folder
+import kashifImage from '../assets/kashif/Kashif.png';
+import kashifImage1 from '../assets/kashif/kashif_1.jpeg';
 
 const FileExplorer = ({ onClose }) => {
   // State to track current directory
@@ -19,16 +22,37 @@ const FileExplorer = ({ onClose }) => {
       const today = new Date();
       const formattedDate = today.toISOString().split('T')[0];
       
-      // Initialize the file system with root directory and three main folders
+      // Initialize the file system with root directory and main folders
       const newFileSystem = {
         '/home/kali/projects': [
           { name: 'web-development', type: 'directory', icon: '📁' },
           { name: 'mobile-apps', type: 'directory', icon: '📁' },
-          { name: 'ui-ux-designs', type: 'directory', icon: '📁' }
+          { name: 'ui-ux-designs', type: 'directory', icon: '📁' },
+          { name: 'pictures', type: 'directory', icon: '📁' }
         ],
         '/home/kali/projects/web-development': [],
         '/home/kali/projects/mobile-apps': [],
-        '/home/kali/projects/ui-ux-designs': []
+        '/home/kali/projects/ui-ux-designs': [],
+        '/home/kali/projects/pictures': [
+          { 
+            name: 'Kashif.png', 
+            type: 'file', 
+            icon: '🖼️', 
+            size: '965 KB',
+            modified: formattedDate,
+            content: 'Image file',
+            imageSrc: kashifImage
+          },
+          { 
+            name: 'kashif_1.jpeg', 
+            type: 'file', 
+            icon: '🖼️', 
+            size: '174 KB',
+            modified: formattedDate,
+            content: 'Image file',
+            imageSrc: kashifImage1
+          }
+        ]
       };
       
       // Group projects by category
@@ -99,6 +123,9 @@ const FileExplorer = ({ onClose }) => {
     // For files, we could implement a preview or details panel in the future
   };
   
+  // State to track the currently opened image
+  const [openedImage, setOpenedImage] = useState(null);
+
   // Handle double click on an item
   const handleItemDoubleClick = (item) => {
     if (item.type === 'directory') {
@@ -110,6 +137,10 @@ const FileExplorer = ({ onClose }) => {
       // Open text files in Notepad
       console.log(`Opening file in Notepad: ${item.name}`);
       setOpenedFile(item);
+    } else if (item.imageSrc && (item.name.endsWith('.png') || item.name.endsWith('.jpg') || item.name.endsWith('.jpeg'))) {
+      // Open image files in image viewer
+      console.log(`Opening image: ${item.name}`);
+      setOpenedImage(item);
     } else {
       // For other files, show a message
       console.log(`Opening file: ${item.name}`);
@@ -178,10 +209,79 @@ const FileExplorer = ({ onClose }) => {
           <button className="mr-2 px-2 py-1 rounded hover:bg-[#313244] text-sm">
             <span className="mr-1">➡️</span> Forward
           </button>
-          <button className="mr-2 px-2 py-1 rounded hover:bg-[#313244] text-sm">
+          <button 
+            className="mr-2 px-2 py-1 rounded hover:bg-[#313244] text-sm"
+            onClick={() => {
+              // Refresh the current directory by regenerating the file system
+              const refreshFileSystem = () => {
+                setFileSystem({});
+                setTimeout(() => {
+                  const generateFileSystem = () => {
+                    const today = new Date();
+                    const formattedDate = today.toISOString().split('T')[0];
+                    
+                    // Initialize the file system with root directory and three main folders
+                    const newFileSystem = {
+                      '/home/kali/projects': [
+                        { name: 'web-development', type: 'directory', icon: '📁' },
+                        { name: 'mobile-apps', type: 'directory', icon: '📁' },
+                        { name: 'ui-ux-designs', type: 'directory', icon: '📁' }
+                      ],
+                      '/home/kali/projects/web-development': [],
+                      '/home/kali/projects/mobile-apps': [],
+                      '/home/kali/projects/ui-ux-designs': []
+                    };
+                    
+                    // Group projects by category
+                    const projectsByCategory = {
+                      'web-development': [],
+                      'mobile-apps': [],
+                      'ui-ux-designs': []
+                    };
+                    
+                    // Categorize projects
+                    projects.forEach(project => {
+                      if (projectsByCategory[project.category]) {
+                        projectsByCategory[project.category].push(project);
+                      }
+                    });
+                    
+                    // Add project .txt files to each category folder
+                    Object.keys(projectsByCategory).forEach(category => {
+                      projectsByCategory[category].forEach(project => {
+                        // Create a .txt file for each project
+                        newFileSystem[`/home/kali/projects/${category}`].push({
+                          name: `${project.title}.txt`,
+                          type: 'file',
+                          icon: '📄',  // 📄 file icon
+                          size: `${(project.description.length / 100).toFixed(1)} KB`,
+                          modified: formattedDate,
+                          content: project.description,
+                          projectId: project.id
+                        });
+                      });
+                    });
+                    
+                    return newFileSystem;
+                  };
+                  
+                  setFileSystem(generateFileSystem());
+                }, 500); // Short delay to show loading state
+              };
+              
+              refreshFileSystem();
+            }}
+          >
             <span className="mr-1">🔄</span> Refresh
           </button>
-          <button className="mr-2 px-2 py-1 rounded hover:bg-[#313244] text-sm">
+          <button 
+            className="mr-2 px-2 py-1 rounded hover:bg-[#313244] text-sm"
+            onClick={() => {
+              // Navigate to the home directory
+              setCurrentPath('/home/kali/projects');
+              setSelectedItem(null);
+            }}
+          >
             <span className="mr-1">🏠</span> Home
           </button>
         </div>
@@ -275,6 +375,56 @@ const FileExplorer = ({ onClose }) => {
         file={openedFile} 
         onClose={() => setOpenedFile(null)} 
       />
+    )}
+    
+    {/* Image Viewer component - outside main container for proper overlay */}
+    {openedImage && (
+      <div className="fixed inset-0 flex items-center justify-center z-[9999]" style={{ pointerEvents: 'none' }}>
+        <div 
+          className="bg-[#1e1e2e] border border-[#313244] rounded shadow-lg w-4/5 max-w-4xl h-4/5 flex flex-col"
+          style={{
+            pointerEvents: 'auto',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)'
+          }}
+        >
+          {/* Image viewer header */}
+          <div className="bg-[#181825] border-b border-[#313244] p-2 flex justify-between items-center cursor-grab">
+            <div className="flex items-center">
+              <span className="mr-2 text-xl">🖼️</span>
+              <span className="font-medium">{openedImage.name} - Image Viewer</span>
+            </div>
+            <div className="flex space-x-2">
+              <button className="px-2 py-1 hover:bg-[#313244] rounded">−</button>
+              <button className="px-2 py-1 hover:bg-[#313244] rounded">🔸</button>
+              <button 
+                className="px-2 py-1 hover:bg-[#f38ba8] hover:text-white rounded"
+                onClick={() => setOpenedImage(null)}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+          
+          {/* Image content */}
+          <div className="flex-1 p-4 overflow-auto bg-[#11111b] flex items-center justify-center">
+            <img 
+              src={openedImage.imageSrc} 
+              alt={openedImage.name}
+              className="max-w-full max-h-full object-contain" 
+            />
+          </div>
+          
+          {/* Image viewer status bar */}
+          <div className="bg-[#181825] border-t border-[#313244] px-4 py-1 text-xs text-gray-400 flex justify-between">
+            <div>
+              {openedImage.size} | {openedImage.modified || 'Unknown date'}
+            </div>
+            <div>
+              Image Viewer
+            </div>
+          </div>
+        </div>
+      </div>
     )}
     </>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Notepad = ({ file, onClose }) => {
   if (!file) return null;
@@ -7,6 +7,10 @@ const Notepad = ({ file, onClose }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  
+  // State for maximized window
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [previousSize, setPreviousSize] = useState({ width: '80%', maxWidth: '4xl', height: '80%' });
   
   // Handle drag start
   const handleMouseDown = (e) => {
@@ -51,12 +55,13 @@ const Notepad = ({ file, onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-[9999]" style={{ pointerEvents: 'none' }}>
       <div 
-        className="bg-[#1e1e2e] border border-[#313244] rounded shadow-lg w-4/5 max-w-4xl h-4/5 flex flex-col"
+        className={`bg-[#1e1e2e] border border-[#313244] rounded shadow-lg flex flex-col ${isMaximized ? 'w-full max-w-none h-full' : 'w-4/5 max-w-4xl h-4/5'}`}
         style={{
-          transform: `translate(${position.x}px, ${position.y}px)`,
+          transform: isMaximized ? 'none' : `translate(${position.x}px, ${position.y}px)`,
           cursor: isDragging ? 'grabbing' : 'auto',
           pointerEvents: 'auto',
-          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)'
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
+          transition: 'width 0.2s, height 0.2s, max-width 0.2s'
         }}
       >
         {/* Notepad header - draggable */}
@@ -70,7 +75,23 @@ const Notepad = ({ file, onClose }) => {
           </div>
           <div className="flex space-x-2">
             <button className="px-2 py-1 hover:bg-[#313244] rounded">−</button>
-            <button className="px-2 py-1 hover:bg-[#313244] rounded">🔸</button>
+            <button 
+              className="px-2 py-1 hover:bg-[#313244] rounded"
+              onClick={() => {
+                setIsMaximized(!isMaximized);
+                if (isMaximized) {
+                  // Restore previous position and size
+                  document.body.style.overflow = 'auto';
+                } else {
+                  // Save current position and size before maximizing
+                  document.body.style.overflow = 'hidden';
+                  // Reset position when maximized
+                  setPosition({ x: 0, y: 0 });
+                }
+              }}
+            >
+              {isMaximized ? '🔽' : '🔸'}
+            </button>
             <button 
               className="px-2 py-1 hover:bg-[#f38ba8] hover:text-white rounded"
               onClick={onClose}

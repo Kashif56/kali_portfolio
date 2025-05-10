@@ -14,7 +14,6 @@ const ContentRenderer = ({ activeContent }) => {
       return (
         <div className="h-full">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-mono font-semibold text-[#00ff00]">File Explorer</h2>
             <button 
               onClick={() => setViewMode('default')}
               className="px-3 py-1 bg-[#0d1117] text-[#00ff00] hover:bg-[#1e1e2e] hover:text-[#00ffaa] font-mono text-sm border border-[#30363d] rounded transition-colors"
@@ -32,7 +31,6 @@ const ContentRenderer = ({ activeContent }) => {
     return (
     <div className="space-y-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-mono font-semibold text-[#00ff00]">My Projects</h2>
         <button 
           onClick={() => setViewMode('explorer')}
           className="px-3 py-1 bg-[#0d1117] text-[#00ff00] hover:bg-[#1e1e2e] hover:text-[#00ffaa] font-mono text-sm border border-[#30363d] rounded transition-colors"
