@@ -115,6 +115,22 @@ const Notepad = ({ file, onClose }) => {
           <div className="font-mono whitespace-pre-wrap bg-[#1e1e2e] text-[#cdd6f4] p-4 h-full overflow-auto">
             {file.content}
             
+            {/* Image Carousel */}
+            {file.images && file.images.length > 0 && (
+              <ImageCarousel images={file.images} />
+            )}
+            
+            {/* Single Image (for backward compatibility) */}
+            {!file.images && file.image && (
+              <div className="mt-4 mb-4">
+                <img 
+                  src={file.image} 
+                  alt={file.title} 
+                  className="max-w-full h-auto rounded border border-[#313244]"
+                />
+              </div>
+            )}
+            
             {file.technologies && (
               <div className="mt-6 border-t border-[#313244] pt-4">
                 <div className="font-bold text-[#cba6f7] mb-2">Technologies:</div>
@@ -158,6 +174,141 @@ const Notepad = ({ file, onClose }) => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Image Carousel Component
+const ImageCarousel = ({ images }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showFullscreen, setShowFullscreen] = useState(false);
+  
+  const goToPrevious = (e) => {
+    if (e) e.stopPropagation(); // Prevent triggering parent click events
+    const isFirstSlide = currentIndex === 0;
+    const newIndex = isFirstSlide ? images.length - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+  };
+  
+  const goToNext = (e) => {
+    if (e) e.stopPropagation(); // Prevent triggering parent click events
+    const isLastSlide = currentIndex === images.length - 1;
+    const newIndex = isLastSlide ? 0 : currentIndex + 1;
+    setCurrentIndex(newIndex);
+  };
+  
+  const goToSlide = (slideIndex) => {
+    setCurrentIndex(slideIndex);
+  };
+
+  const toggleFullscreen = () => {
+    setShowFullscreen(!showFullscreen);
+  };
+  
+  if (!images || images.length === 0) return null;
+  
+  return (
+    <>
+      <div className="mt-4 mb-4 relative">
+        <div 
+          className="relative h-[400px] w-full overflow-hidden rounded border border-[#313244] cursor-pointer"
+          onClick={toggleFullscreen}
+        >
+          <img 
+            src={images[currentIndex]} 
+            alt={`Slide ${currentIndex + 1}`}
+            className="w-full h-full object-contain"
+          />
+          
+          {/* Fullscreen hint */}
+          <div className="absolute top-2 right-2 bg-[#181825] text-white px-2 py-1 rounded text-xs opacity-70">
+            Click to enlarge
+          </div>
+          
+          {/* Left Arrow */}
+          <div 
+            className="absolute top-1/2 left-2 -translate-y-1/2 bg-[#181825] text-white p-2 rounded-full cursor-pointer opacity-70 hover:opacity-100 transition-opacity z-10"
+            onClick={(e) => goToPrevious(e)}
+          >
+            ◀
+          </div>
+          
+          {/* Right Arrow */}
+          <div 
+            className="absolute top-1/2 right-2 -translate-y-1/2 bg-[#181825] text-white p-2 rounded-full cursor-pointer opacity-70 hover:opacity-100 transition-opacity z-10"
+            onClick={(e) => goToNext(e)}
+          >
+            ▶
+          </div>
+        </div>
+        
+        {/* Dots/Indicators */}
+        <div className="flex justify-center mt-2">
+          {images.map((_, slideIndex) => (
+            <div
+              key={slideIndex}
+              onClick={() => goToSlide(slideIndex)}
+              className={`mx-1 h-2 w-2 rounded-full cursor-pointer transition-colors ${currentIndex === slideIndex ? 'bg-[#cba6f7]' : 'bg-[#313244]'}`}
+            ></div>
+          ))}
+        </div>
+        
+        {/* Image Counter */}
+        <div className="absolute bottom-2 right-2 bg-[#181825] text-white px-2 py-1 rounded text-xs opacity-70">
+          {currentIndex + 1} / {images.length}
+        </div>
+      </div>
+      
+      {/* Fullscreen Modal */}
+      {showFullscreen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[10000] cursor-zoom-out"
+          onClick={toggleFullscreen}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh]">
+            <img 
+              src={images[currentIndex]} 
+              alt={`Fullscreen ${currentIndex + 1}`}
+              className="max-w-full max-h-[90vh] object-contain"
+            />
+            
+            {/* Close button */}
+            <button 
+              className="absolute top-2 right-2 bg-[#181825] text-white p-2 rounded-full opacity-70 hover:opacity-100 transition-opacity"
+              onClick={toggleFullscreen}
+            >
+              ✕
+            </button>
+            
+            {/* Left Arrow */}
+            <div 
+              className="absolute top-1/2 left-4 -translate-y-1/2 bg-[#181825] text-white p-3 rounded-full cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToPrevious(e);
+              }}
+            >
+              ◀
+            </div>
+            
+            {/* Right Arrow */}
+            <div 
+              className="absolute top-1/2 right-4 -translate-y-1/2 bg-[#181825] text-white p-3 rounded-full cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToNext(e);
+              }}
+            >
+              ▶
+            </div>
+            
+            {/* Image Counter */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#181825] text-white px-3 py-1 rounded text-sm opacity-70">
+              {currentIndex + 1} / {images.length}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

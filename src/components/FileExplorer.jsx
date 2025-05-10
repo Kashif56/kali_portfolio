@@ -99,7 +99,9 @@ const FileExplorer = ({ onClose }) => {
             content: project.description,
             projectId: project.id,
             technologies: project.technologies,
-            link: project.link
+            link: project.link,
+            image: project.image,
+            images: project.images // Add the images array for the carousel
           });
         });
       });
