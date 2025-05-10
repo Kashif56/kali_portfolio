@@ -6,12 +6,12 @@ import FileExplorer from './FileExplorer';
 import kashifImage from '../assets/kashif/Kashif.png';
 
 const ContentRenderer = ({ activeContent }) => {
-  const [viewMode, setViewMode] = useState('default'); // 'default' or 'explorer'
+  const [viewMode, setViewMode] = useState('explorer'); // Changed default to 'explorer' instead of 'default'
   
   if (!activeContent) return null;
 
   const renderProjects = () => {
-    if (viewMode === 'explorer') {
+    if (viewMode === 'explorer') { // This is now the default view
       return (
         <div className="h-full">
           <div className="flex justify-between items-center mb-4">

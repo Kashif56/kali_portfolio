@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import projects from '../data/projects';
+import personalInfo from '../data/personal';
 import Notepad from './Notepad';
 // Import images from kashif folder
 import kashifImage from '../assets/kashif/Kashif.png';
@@ -48,9 +49,13 @@ const FileExplorer = ({ onClose }) => {
       // Initialize the file system with root directory
       const newFileSystem = {
         '/home/kali/projects': [],
+        '/home/kali/documents': [],
+        '/home/kali/downloads': [],
+        '/home/kali/pictures': [],
+        '/home/kali/music': [],
       };
       
-      // Add all category folders to root directory
+      // Add all category folders to projects directory
       Object.keys(projectsByCategory).forEach(category => {
         newFileSystem['/home/kali/projects'].push({ 
           name: category, 
@@ -61,11 +66,21 @@ const FileExplorer = ({ onClose }) => {
         newFileSystem[`/home/kali/projects/${category}`] = [];
       });
       
-      // Sort the folders alphabetically in the root directory
+      // Sort the folders alphabetically in the projects directory
       newFileSystem['/home/kali/projects'].sort((a, b) => a.name.localeCompare(b.name));
       
+      // Add personal information file to documents folder
+      newFileSystem['/home/kali/documents'].push({
+        name: 'Kashif Mehmood.txt',
+        type: 'file',
+        icon: '📄',
+        size: `${personalInfo.bio.length / 100} KB`,
+        modified: formattedDate,
+        content: formatPersonalInfo(personalInfo),
+      });
+      
       // Add images to pictures folder
-      newFileSystem['/home/kali/projects/pictures'] = [
+      newFileSystem['/home/kali/pictures'] = [
         { 
           name: 'Kashif.png', 
           type: 'file', 
@@ -112,24 +127,60 @@ const FileExplorer = ({ onClose }) => {
     setFileSystem(generateFileSystem());
   }, []);  // Empty dependency array means this runs once on mount
   
+  // Format personal information for display
+  const formatPersonalInfo = (info) => {
+    return `Name: ${info.name}
+Title: ${info.title}
+
+${info.bio}
+
+Location: ${info.location}
+Email: ${info.email}
+
+Education:
+${info.education.map(edu => `• ${edu.degree} - ${edu.institution} (${edu.year})`).join('\n')}
+
+Skills:
+• Frontend: ${info.skills.frontend.join(', ')}
+• Backend: ${info.skills.backend.join(', ')}
+• Database: ${info.skills.database.join(', ')}
+• Vector DBs: ${info.skills.vectorDBs.join(', ')}
+• Deployment: ${info.skills.deployment.join(', ')}
+• Version Control: ${info.skills.versionControl.join(', ')}
+
+Social Media:
+• GitHub: ${info.socialMedia.github}
+• LinkedIn: ${info.socialMedia.linkedin}
+• Instagram: ${info.socialMedia.instagram}
+
+Freelance Platforms:
+${info.freelancePlatforms.map(platform => `• ${platform.name}: ${platform.url} (Rating: ${platform.rating}, Jobs Completed: ${platform.jobsCompleted})`).join('\n')}`;
+  };
+  
   // Get current directory contents
   const currentDirContents = fileSystem[currentPath] || [];
   
   // Handle navigation to a directory
   const navigateToDirectory = (dirName) => {
     if (dirName === '..') {
-      // Navigate up one level
+      // Go up one level
       const pathParts = currentPath.split('/');
-      pathParts.pop();
-      const newPath = pathParts.join('/') || '/';
-      setCurrentPath(newPath);
+      pathParts.pop(); // Remove the last part
+      const newPath = pathParts.join('/');
+      setCurrentPath(newPath || '/'); // Ensure we don't end up with an empty path
+    } else if (dirName === '/') {
+      // Go to root
+      setCurrentPath('/');
+    } else if (dirName.startsWith('/')) {
+      // Absolute path navigation (for sidebar)
+      setCurrentPath(dirName);
     } else {
-      // Navigate into directory
-      const newPath = `${currentPath}/${dirName}`;
-      if (fileSystem[newPath]) {
-        setCurrentPath(newPath);
-      }
+      // Navigate to the specified directory
+      const newPath = `${currentPath}/${dirName}`.replace(/\/\/+/g, '/');
+      setCurrentPath(newPath);
     }
+    
+    // Clear selection when navigating
     setSelectedItem(null);
   };
   
@@ -338,31 +389,52 @@ const FileExplorer = ({ onClose }) => {
         
         {/* Main content area */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <div className="w-48 bg-[#181825] border-r border-[#313244] p-2 overflow-y-auto">
-            <div className="mb-2 font-bold text-xs text-gray-400 uppercase">Quick Access</div>
-            <div className="mb-1 pl-2 py-1 text-sm hover:bg-[#313244] rounded cursor-pointer">
-              <span className="mr-2">📁</span> Home
+          {/* Quick access sidebar */}
+          <div className="w-[200px] bg-[#11111b] border-r border-[#313244] overflow-y-auto">
+            <div className="p-2 text-xs text-gray-400 border-b border-[#313244]">QUICK ACCESS</div>
+            <div className="p-2 space-y-1">
+              <div 
+                className="p-2 rounded cursor-pointer hover:bg-[#313244] flex items-center"
+                onClick={() => navigateToDirectory('/home/kali/projects')}
+              >
+                <span className="mr-2 text-xl">📁</span>
+                <span className="text-sm">Home</span>
+              </div>
+              <div 
+                className="p-2 rounded cursor-pointer hover:bg-[#313244] flex items-center"
+                onClick={() => navigateToDirectory('/home/kali/documents')}
+              >
+                <span className="mr-2 text-xl">📁</span>
+                <span className="text-sm">Documents</span>
+              </div>
+              <div 
+                className="p-2 rounded cursor-pointer hover:bg-[#313244] flex items-center"
+                onClick={() => navigateToDirectory('/home/kali/downloads')}
+              >
+                <span className="mr-2 text-xl">📁</span>
+                <span className="text-sm">Downloads</span>
+              </div>
+              <div 
+                className="p-2 rounded cursor-pointer hover:bg-[#313244] flex items-center"
+                onClick={() => navigateToDirectory('/home/kali/pictures')}
+              >
+                <span className="mr-2 text-xl">📁</span>
+                <span className="text-sm">Pictures</span>
+              </div>
+              <div 
+                className="p-2 rounded cursor-pointer hover:bg-[#313244] flex items-center"
+                onClick={() => navigateToDirectory('/home/kali/music')}
+              >
+                <span className="mr-2 text-xl">📁</span>
+                <span className="text-sm">Music</span>
+              </div>
             </div>
-            <div className="mb-1 pl-2 py-1 text-sm hover:bg-[#313244] rounded cursor-pointer">
-              <span className="mr-2">📁</span> Documents
-            </div>
-            <div className="mb-1 pl-2 py-1 text-sm hover:bg-[#313244] rounded cursor-pointer">
-              <span className="mr-2">📁</span> Downloads
-            </div>
-            <div className="mb-1 pl-2 py-1 text-sm hover:bg-[#313244] rounded cursor-pointer">
-              <span className="mr-2">📁</span> Pictures
-            </div>
-            <div className="mb-4 pl-2 py-1 text-sm hover:bg-[#313244] rounded cursor-pointer">
-              <span className="mr-2">📁</span> Music
-            </div>
-            
-            <div className="mb-2 font-bold text-xs text-gray-400 uppercase">Devices</div>
-            <div className="mb-1 pl-2 py-1 text-sm hover:bg-[#313244] rounded cursor-pointer">
-              <span className="mr-2">💻</span> Local Disk (C:)
-            </div>
-            <div className="mb-1 pl-2 py-1 text-sm hover:bg-[#313244] rounded cursor-pointer">
-              <span className="mr-2">💾</span> USB Drive
+            <div className="p-2 text-xs text-gray-400 border-b border-t border-[#313244] mt-2">DEVICES</div>
+            <div className="p-2 space-y-1">
+              <div className="p-2 rounded cursor-pointer hover:bg-[#313244] flex items-center">
+                <span className="mr-2 text-xl">🖥️</span>
+                <span className="text-sm">Local Disk</span>
+              </div>
             </div>
           </div>
           
