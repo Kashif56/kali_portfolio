@@ -59,6 +59,23 @@ const Desktop = () => {
   // Window focus management (z-index ordering)
   const [focusOrder, setFocusOrder] = useState([]);
   
+  // Window color mapping for unique top bar colors
+  const [windowColors, setWindowColors] = useState({});
+  
+  // Predefined colors for window top bars (darker shades)
+  const topBarColors = [
+    '#1a4971', // Dark Blue
+    '#5e3370', // Dark Purple
+    '#1a6840', // Dark Green
+    '#922b21', // Dark Red
+    '#9a5f0b', // Dark Orange
+    '#117864', // Dark Teal
+    '#873600', // Dark Pumpkin
+    '#512e5f', // Dark Wisteria
+    '#0e6251', // Dark Green Sea
+    '#7b241c', // Dark Pomegranate
+  ];
+  
   // References for drag and resize handling
   const dragRef = useRef(null);
   const resizeRef = useRef(null);
@@ -359,6 +376,13 @@ const Desktop = () => {
           [content]: size
         }));
         
+        // Assign a unique color to the window
+        const colorIndex = openWindows.length % topBarColors.length;
+        setWindowColors(prev => ({
+          ...prev,
+          [content]: topBarColors[colorIndex]
+        }));
+        
         // Add to focus order
         setFocusOrder(prev => [...prev, content]);
       }
@@ -388,6 +412,13 @@ const Desktop = () => {
       setWindowSizes(prev => ({
         ...prev,
         [command]: size
+      }));
+      
+      // Assign a unique color to the window
+      const colorIndex = openWindows.length % topBarColors.length;
+      setWindowColors(prev => ({
+        ...prev,
+        [command]: topBarColors[colorIndex]
       }));
     } else {
       // If already open, just bring to front
@@ -649,11 +680,14 @@ const Desktop = () => {
           >
             <div className="w-full h-full flex flex-col bg-[#1e1e2e] rounded-md overflow-hidden shadow-2xl border border-[#30363d] relative">
               {/* Content header with controls */}
+              {/* Window title bar */}
               <div 
-                className="flex items-center px-4 py-2 bg-[#0d1117] border-b border-[#30363d] cursor-move"
+                className="flex items-center h-8 border-b border-[#30363d] px-2 cursor-move" 
+                style={{ backgroundColor: windowColors[windowContent] || '#1e1e2e' }}
                 onMouseDown={(e) => handleStartDrag(e, windowContent)}
               >
-                <div className="flex space-x-3">
+                {/* Window controls */}
+                <div className="flex space-x-2">
                   {/* Close button with X symbol always visible */}
                   <div 
                     className="w-5 h-5 bg-red-500 rounded-full cursor-pointer hover:bg-red-600 flex items-center justify-center group relative"
@@ -678,7 +712,7 @@ const Desktop = () => {
                   </div>
                   <div className="w-5 h-5 bg-green-500 rounded-full"></div>
                 </div>
-                <div className="flex-1 text-center text-sm font-mono text-[#00ff00]">
+                <div className="flex-1 text-center text-sm font-mono text-white font-bold">
                   {windowContent.charAt(0).toUpperCase() + windowContent.slice(1)}
                 </div>
               </div>
