@@ -53,6 +53,11 @@ const Desktop = () => {
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
   const [contextMenuTarget, setContextMenuTarget] = useState({ type: '', id: '' });
   
+  // Mouse follower animation state
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [cursorParticles, setCursorParticles] = useState([]);
+  const particleIdRef = useRef(0);
+  
   // Window positions for dragging (including terminal)
   const [windowPositions, setWindowPositions] = useState({ terminal: { x: 100, y: 100 } });
   
@@ -94,113 +99,168 @@ const Desktop = () => {
   const resizeStartMouseRef = useRef({ x: 0, y: 0 });
   const resizeTypeRef = useRef(null); // 'se', 'sw', 'ne', 'nw', 'n', 's', 'e', 'w'
   
-  // Set up event listeners for dragging and resizing
+  // Add CSS animations for cursor effects and custom cursor
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      // Handle window dragging
-      if (dragRef.current) {
-        // Calculate new position
-        const newPosition = {
-          x: e.clientX - dragOffsetRef.current.x,
-          y: e.clientY - dragOffsetRef.current.y
-        };
-        
-        // Update position
-        setWindowPositions(prev => ({
-          ...prev,
-          [dragRef.current]: newPosition
-        }));
+    // Create a style element
+    const styleEl = document.createElement('style');
+    // Define the animations and custom cursor
+    const css = `
+      @keyframes particleFade {
+        0% { opacity: 0.8; transform: scale(1); }
+        100% { opacity: 0; transform: scale(0); }
+      }
+      @keyframes pulseEffect {
+        0% { opacity: 0.2; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.1); }
+        100% { opacity: 0.2; transform: scale(1); }
+      }
+      .kali-desktop {
+        cursor: none !important;
+      }
+      .kali-desktop * {
+        cursor: none !important;
+      }
+    `;
+    styleEl.appendChild(document.createTextNode(css));
+    document.head.appendChild(styleEl);
+    
+    return () => {
+      // Clean up
+      document.head.removeChild(styleEl);
+    };
+  }, []);
+  
+  // Mouse movement handler for animation and dragging
+  const handleMouseMove = (e) => {
+    // Update mouse position for animation
+    setMousePosition({ x: e.clientX, y: e.clientY });
+    
+    // Create new particles occasionally
+    if (Math.random() < 0.1) { // Adjust probability to control particle frequency
+      const newParticle = {
+        id: particleIdRef.current++,
+        x: e.clientX,
+        y: e.clientY,
+        size: Math.random() * 8 + 2, // Random size between 2-10px
+        color: `hsl(${Math.random() * 40 + 100}, 100%, ${Math.random() * 20 + 40}%)`, // Green hues for Kali theme
+        lifetime: 1000 // Particle lifetime in ms
+      };
+      
+      setCursorParticles(prev => [...prev, newParticle]);
+      
+      // Remove the particle after its lifetime
+      setTimeout(() => {
+        setCursorParticles(prev => prev.filter(p => p.id !== newParticle.id));
+      }, newParticle.lifetime);
+    }
+    
+    // Handle window dragging
+    if (dragRef.current) {
+      // Calculate new position
+      const newPosition = {
+        x: e.clientX - dragOffsetRef.current.x,
+        y: e.clientY - dragOffsetRef.current.y
+      };
+      
+      // Update position
+      setWindowPositions(prev => ({
+        ...prev,
+        [dragRef.current]: newPosition
+      }));
+    }
+    
+    // Handle window resizing
+    if (resizeRef.current && resizeTypeRef.current) {
+      const windowId = resizeRef.current;
+      const resizeType = resizeTypeRef.current;
+      const startSize = resizeStartRef.current;
+      const startPosition = resizeStartPositionRef.current;
+      
+      // Calculate mouse movement deltas
+      const deltaX = e.clientX - resizeStartMouseRef.current.x;
+      const deltaY = e.clientY - resizeStartMouseRef.current.y;
+      
+      // Initialize new dimensions and position
+      let newWidth = startSize.width;
+      let newHeight = startSize.height;
+      let newX = startPosition.x;
+      let newY = startPosition.y;
+      
+      // Apply resize based on handle type
+      switch (resizeType) {
+        case 'se': // bottom-right
+          newWidth = Math.max(200, startSize.width + deltaX);
+          newHeight = Math.max(200, startSize.height + deltaY);
+          break;
+          
+        case 'sw': // bottom-left
+          newWidth = Math.max(200, startSize.width - deltaX);
+          newX = startPosition.x + startSize.width - newWidth;
+          newHeight = Math.max(200, startSize.height + deltaY);
+          break;
+          
+        case 'ne': // top-right
+          newWidth = Math.max(200, startSize.width + deltaX);
+          newHeight = Math.max(200, startSize.height - deltaY);
+          newY = startPosition.y + startSize.height - newHeight;
+          break;
+          
+        case 'nw': // top-left
+          newWidth = Math.max(200, startSize.width - deltaX);
+          newHeight = Math.max(200, startSize.height - deltaY);
+          newX = startPosition.x + startSize.width - newWidth;
+          newY = startPosition.y + startSize.height - newHeight;
+          break;
+          
+        case 'n': // top
+          newHeight = Math.max(200, startSize.height - deltaY);
+          newY = startPosition.y + startSize.height - newHeight;
+          break;
+          
+        case 's': // bottom
+          newHeight = Math.max(200, startSize.height + deltaY);
+          break;
+          
+        case 'e': // right
+          newWidth = Math.max(200, startSize.width + deltaX);
+          break;
+          
+        case 'w': // left
+          newWidth = Math.max(200, startSize.width - deltaX);
+          newX = startPosition.x + startSize.width - newWidth;
+          break;
+          
+        default:
+          break;
       }
       
-      // Handle window resizing
-      if (resizeRef.current && resizeTypeRef.current) {
-        const windowId = resizeRef.current;
-        const resizeType = resizeTypeRef.current;
-        const startSize = resizeStartRef.current;
-        const startPosition = resizeStartPositionRef.current;
-        
-        // Calculate mouse movement deltas
-        const deltaX = e.clientX - resizeStartMouseRef.current.x;
-        const deltaY = e.clientY - resizeStartMouseRef.current.y;
-        
-        // Initialize new dimensions and position
-        let newWidth = startSize.width;
-        let newHeight = startSize.height;
-        let newX = startPosition.x;
-        let newY = startPosition.y;
-        
-        // Apply resize based on handle type
-        switch (resizeType) {
-          case 'se': // bottom-right
-            newWidth = Math.max(200, startSize.width + deltaX);
-            newHeight = Math.max(200, startSize.height + deltaY);
-            break;
-            
-          case 'sw': // bottom-left
-            newWidth = Math.max(200, startSize.width - deltaX);
-            newX = startPosition.x + startSize.width - newWidth;
-            newHeight = Math.max(200, startSize.height + deltaY);
-            break;
-            
-          case 'ne': // top-right
-            newWidth = Math.max(200, startSize.width + deltaX);
-            newHeight = Math.max(200, startSize.height - deltaY);
-            newY = startPosition.y + startSize.height - newHeight;
-            break;
-            
-          case 'nw': // top-left
-            newWidth = Math.max(200, startSize.width - deltaX);
-            newHeight = Math.max(200, startSize.height - deltaY);
-            newX = startPosition.x + startSize.width - newWidth;
-            newY = startPosition.y + startSize.height - newHeight;
-            break;
-            
-          case 'n': // top
-            newHeight = Math.max(200, startSize.height - deltaY);
-            newY = startPosition.y + startSize.height - newHeight;
-            break;
-            
-          case 's': // bottom
-            newHeight = Math.max(200, startSize.height + deltaY);
-            break;
-            
-          case 'e': // right
-            newWidth = Math.max(200, startSize.width + deltaX);
-            break;
-            
-          case 'w': // left
-            newWidth = Math.max(200, startSize.width - deltaX);
-            newX = startPosition.x + startSize.width - newWidth;
-            break;
-            
-          default:
-            break;
-        }
-        
-        // Update window size
-        setWindowSizes(prev => ({
+      // Update window size
+      setWindowSizes(prev => ({
+        ...prev,
+        [windowId]: { width: newWidth, height: newHeight }
+      }));
+      
+      // Update position if needed (for resizing from left or top)
+      if (newX !== startPosition.x || newY !== startPosition.y) {
+        setWindowPositions(prev => ({
           ...prev,
-          [windowId]: { width: newWidth, height: newHeight }
+          [windowId]: { x: newX, y: newY }
         }));
-        
-        // Update position if needed (for resizing from left or top)
-        if (newX !== position.x || newY !== position.y) {
-          setWindowPositions(prev => ({
-            ...prev,
-            [windowId]: { x: newX, y: newY }
-          }));
-        }
       }
-    };
-    
-    const handleMouseUp = () => {
-      dragRef.current = null;
-      resizeRef.current = null;
-      resizeTypeRef.current = null;
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'default';
-    };
+    }
+  };
+  
+  // Handle mouse up event
+  const handleMouseUp = () => {
+    // Clear drag and resize references
+    dragRef.current = null;
+    resizeRef.current = null;
+    resizeTypeRef.current = null;
+    document.body.style.cursor = 'default';
+  };
+  
+  // Set up event listeners for dragging and resizing
+  useEffect(() => {
     
     if (dragRef.current || resizeRef.current) {
       document.addEventListener('mousemove', handleMouseMove);
@@ -671,14 +731,78 @@ const Desktop = () => {
 
   return (
     <div 
-      className="relative w-full h-screen overflow-hidden bg-kali-wallpaper" 
+      className="relative w-full h-screen overflow-hidden bg-kali-wallpaper kali-desktop" 
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
       onContextMenu={handleDesktopContextMenu}
     >
+      {/* Mouse follower animation */}
+      {cursorParticles.map(particle => (
+        <div
+          key={particle.id}
+          className="absolute rounded-full pointer-events-none z-50"
+          style={{ 
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            backgroundColor: particle.color,
+            boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
+            left: `${particle.x}px`,
+            top: `${particle.y}px`,
+            opacity: 0,
+            transform: 'scale(0)',
+            animation: `particleFade ${particle.lifetime}ms ease-out forwards`
+          }}
+        />
+      ))}
+      
+      {/* Jet plane style cursor */}
+      <div className="pointer-events-none fixed z-[9999]" style={{ left: `${mousePosition.x}px`, top: `${mousePosition.y}px`, transform: 'translate(-50%, -50%)' }}>
+        {/* Jet plane SVG */}
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'rotate(-45deg)' }}>
+          {/* Jet body */}
+          <path 
+            d="M12 2L4 12H9L7 22L12 16L17 22L15 12H20L12 2Z" 
+            fill="#00ff41"
+            fillOpacity="0.3"
+            stroke="#00ff41" 
+            strokeWidth="1.5" 
+            strokeLinejoin="round"
+            style={{ filter: 'drop-shadow(0 0 3px rgba(0, 255, 65, 0.8))' }}
+          />
+          
+          {/* Jet wings highlight */}
+          <path 
+            d="M9 12L12 16L15 12" 
+            stroke="#00ff41" 
+            strokeWidth="1.5" 
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        
+        {/* Jet trail/exhaust effect */}
+        <div className="absolute w-1 h-6 bg-gradient-to-t from-transparent to-green-500" style={{ 
+          left: '50%',
+          top: '60%',
+          transform: 'translate(-50%, 0) rotate(-45deg)',
+          opacity: 0.6
+        }} />
+        
+        {/* Precise click point */}
+        <div className="absolute w-1.5 h-1.5 bg-green-500 rounded-full" style={{ 
+          left: '0',
+          top: '0',
+          transform: 'translate(-50%, -50%)',
+          boxShadow: '0 0 3px #00ff41'
+        }} />
+      </div>
+      
       {/* Top Bar */}
       <TopBar 
         onTerminalClick={() => handleIconClick('terminal')} 
         onResetIcons={resetIconPositions} 
       />
+      
       {/* Desktop Icons - positioned with absolute positioning instead of grid */}
       {desktopIcons.map((icon, index) => {
         // Calculate position with offset to avoid the top bar
