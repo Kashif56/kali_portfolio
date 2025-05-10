@@ -3,6 +3,7 @@ import DesktopIcon from './DesktopIcon';
 import Terminal from './Terminal';
 import ContentRenderer from './ContentRenderer';
 import TopBar from './TopBar';
+import ContextMenu from './ContextMenu';
 
 // Custom icon components with colors
 const FolderIcon = () => (
@@ -46,6 +47,11 @@ const Desktop = () => {
   const [showTerminal, setShowTerminal] = useState(false);
   const [terminalMinimized, setTerminalMinimized] = useState(false);
   const [minimizedWindows, setMinimizedWindows] = useState({});
+  
+  // Context menu state
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
+  const [contextMenuTarget, setContextMenuTarget] = useState({ type: '', id: '' });
   
   // Window positions for dragging (including terminal)
   const [windowPositions, setWindowPositions] = useState({ terminal: { x: 100, y: 100 } });
@@ -489,8 +495,13 @@ const Desktop = () => {
   }, []); // Only run on mount
   
   // Handle icon position changes
-  const handleIconPositionChange = (iconId, newPosition) => {
+  const handleIconPositionChange = (iconId, newPosition, isReset = false) => {
     if (!iconId) return; // Safety check
+    
+    // If isReset is true, use the default position for this icon
+    if (isReset) {
+      newPosition = defaultIconPositions[iconId];
+    }
     
     // Update state with the new position
     setIconPositions(prev => {
@@ -508,6 +519,97 @@ const Desktop = () => {
       
       return updated;
     });
+  };
+  
+  // Handle desktop context menu
+  const handleDesktopContextMenu = (e) => {
+    // Prevent default browser context menu
+    e.preventDefault();
+    
+    // Set context menu position and target
+    setContextMenuPos({ x: e.clientX, y: e.clientY });
+    setContextMenuTarget({ type: 'Desktop', id: 'Background' });
+    setShowContextMenu(true);
+  };
+  
+  // Handle window context menu
+  const handleWindowContextMenu = (e, windowId) => {
+    // Prevent default browser context menu
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Set context menu position and target
+    setContextMenuPos({ x: e.clientX, y: e.clientY });
+    setContextMenuTarget({ type: 'Window', id: windowId });
+    setShowContextMenu(true);
+  };
+  
+  // Close context menu
+  const closeContextMenu = () => {
+    setShowContextMenu(false);
+  };
+  
+  // Define desktop context menu items
+  const getContextMenuItems = () => {
+    // Different menu items based on target type
+    if (contextMenuTarget.type === 'Desktop') {
+      return [
+        {
+          label: 'Open Terminal',
+          icon: '🖥️',
+          onClick: () => handleIconClick('terminal')
+        },
+        {
+          separator: true
+        },
+        {
+          label: 'Reset All Icons',
+          icon: '🔄',
+          onClick: resetIconPositions
+        },
+        {
+          label: 'Create New Folder',
+          icon: '📁',
+          onClick: () => console.log('Create New Folder clicked'),
+          disabled: true // Not implemented yet
+        },
+        {
+          separator: true
+        },
+        {
+          label: 'Display Settings',
+          icon: '🖌️',
+          onClick: () => console.log('Display Settings clicked'),
+          disabled: true // Not implemented yet
+        }
+      ];
+    } else if (contextMenuTarget.type === 'Window') {
+      const windowId = contextMenuTarget.id;
+      const isMinimized = minimizedWindows[windowId];
+      
+      return [
+        {
+          label: isMinimized ? 'Restore' : 'Minimize',
+          icon: isMinimized ? '🔼' : '🔽',
+          onClick: () => isMinimized ? handleRestoreWindow(windowId) : handleMinimizeWindow(windowId)
+        },
+        {
+          label: 'Close',
+          icon: '❌',
+          onClick: () => handleCloseWindow(windowId)
+        },
+        {
+          separator: true
+        },
+        {
+          label: 'Center Window',
+          icon: '📍',
+          onClick: () => centerWindow(windowId)
+        }
+      ];
+    }
+    
+    return [];
   };
 
   // Reset all icon positions to default
@@ -556,7 +658,10 @@ const Desktop = () => {
   ];
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-kali-wallpaper">
+    <div 
+      className="relative w-full h-screen overflow-hidden bg-kali-wallpaper" 
+      onContextMenu={handleDesktopContextMenu}
+    >
       {/* Top Bar */}
       <TopBar 
         onTerminalClick={() => handleIconClick('terminal')} 
@@ -628,6 +733,18 @@ const Desktop = () => {
         }
       </div>
 
+      {/* Context Menu */}
+      {showContextMenu && (
+        <ContextMenu
+          x={contextMenuPos.x}
+          y={contextMenuPos.y}
+          onClose={closeContextMenu}
+          menuItems={getContextMenuItems()}
+          targetType={contextMenuTarget.type}
+          targetId={contextMenuTarget.id}
+        />
+      )}
+      
       {/* Terminal Window */}
       {showTerminal && !terminalMinimized && (
         <div 
@@ -769,7 +886,10 @@ const Desktop = () => {
                 onMouseDown={(e) => handleStartDrag(e, windowContent)}
               >
                 {/* Window title - left aligned */}
-                <div className="flex-1 text-left text-sm font-mono text-white font-bold">
+                <div 
+                  className="flex-1 text-left text-sm font-mono text-white font-bold"
+                  onContextMenu={(e) => handleWindowContextMenu(e, windowContent)}
+                >
                   {windowContent.charAt(0).toUpperCase() + windowContent.slice(1)}
                 </div>
                 

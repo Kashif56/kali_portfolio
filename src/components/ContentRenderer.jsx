@@ -1,13 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import projects from '../data/projects';
 import experiences from '../data/experience';
 import personalInfo from '../data/personal';
+import FileExplorer from './FileExplorer';
 
 const ContentRenderer = ({ activeContent }) => {
+  const [viewMode, setViewMode] = useState('default'); // 'default' or 'explorer'
+  
   if (!activeContent) return null;
 
-  const renderProjects = () => (
+  const renderProjects = () => {
+    if (viewMode === 'explorer') {
+      return (
+        <div className="h-full">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-mono font-semibold text-[#00ff00]">File Explorer</h2>
+            <button 
+              onClick={() => setViewMode('default')}
+              className="px-3 py-1 bg-[#0d1117] text-[#00ff00] hover:bg-[#1e1e2e] hover:text-[#00ffaa] font-mono text-sm border border-[#30363d] rounded transition-colors"
+            >
+              Switch to Card View
+            </button>
+          </div>
+          <div className="h-[calc(100%-40px)]">
+            <FileExplorer />
+          </div>
+        </div>
+      );
+    }
+    
+    return (
     <div className="space-y-8">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-mono font-semibold text-[#00ff00]">My Projects</h2>
+        <button 
+          onClick={() => setViewMode('explorer')}
+          className="px-3 py-1 bg-[#0d1117] text-[#00ff00] hover:bg-[#1e1e2e] hover:text-[#00ffaa] font-mono text-sm border border-[#30363d] rounded transition-colors"
+        >
+          Switch to Explorer View
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {projects.map((project) => (
@@ -37,6 +69,7 @@ const ContentRenderer = ({ activeContent }) => {
       </div>
     </div>
   );
+  };
 
   const renderExperience = () => (
     <div className="space-y-8">

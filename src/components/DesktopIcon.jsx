@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ContextMenu from './ContextMenu';
 
 const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor = "#2c3e50", id, onPositionChange }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [scale, setScale] = useState(1);
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
   const iconRef = useRef(null);
   const offset = useRef({ x: 0, y: 0 });
   const startPosRef = useRef({ x: 0, y: 0 });
@@ -69,6 +72,60 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
     // Remove the no-select class from body
     document.body.classList.remove('no-select');
   };
+  
+  // Handle right click to show context menu
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    setContextMenuPos({ x: e.clientX, y: e.clientY });
+    setShowContextMenu(true);
+  };
+  
+  // Close context menu
+  const closeContextMenu = () => {
+    setShowContextMenu(false);
+  };
+  
+  // Define context menu items
+  const contextMenuItems = [
+    {
+      label: 'Open',
+      icon: '📂',
+      onClick: () => onClick()
+    },
+    {
+      separator: true
+    },
+    {
+      label: 'Move to center',
+      icon: '📍',
+      onClick: () => {
+        // Calculate center position (adjusted for icon size)
+        const centerX = Math.max(0, (window.innerWidth / 2) - 40);
+        const centerY = Math.max(0, (window.innerHeight / 2) - 40);
+        onPositionChange(id, { x: centerX, y: centerY });
+      }
+    },
+    {
+      label: 'Reset position',
+      icon: '🔄',
+      onClick: () => {
+        // This will trigger the reset for this specific icon
+        // The actual reset logic is handled in the parent component
+        onPositionChange(id, null, true);
+      }
+    },
+    {
+      separator: true
+    },
+    {
+      label: 'Properties',
+      icon: '⚙️',
+      onClick: () => {
+        console.log(`Properties for ${id}`);
+        // Could open a properties dialog in the future
+      }
+    }
+  ];
 
   // Add and remove event listeners
   useEffect(() => {
@@ -96,27 +153,29 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
   };
 
   return (
-    <div
-      ref={iconRef}
-      className={`absolute flex flex-col items-center justify-center w-20 h-24 p-2 cursor-pointer group ${isDragging ? 'dragging' : 'draggable'}`}
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        transform: `scale(${scale})`,
-        transition: isDragging ? 'none' : 'all 0.2s',
-        userSelect: 'none',
-        touchAction: 'none'
-      }}
-      onClick={(e) => {
-        // Only trigger onClick if no significant dragging occurred
-        if (!hasDraggedRef.current) {
-          onClick(e);
-        }
-      }}
-      onMouseDown={handleMouseDown}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <>
+      <div
+        ref={iconRef}
+        className={`absolute flex flex-col items-center justify-center w-20 h-24 p-2 cursor-pointer group ${isDragging ? 'dragging' : 'draggable'}`}
+        style={{
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          transform: `scale(${scale})`,
+          transition: isDragging ? 'none' : 'all 0.2s',
+          userSelect: 'none',
+          touchAction: 'none'
+        }}
+        onClick={(e) => {
+          // Only trigger onClick if no significant dragging occurred
+          if (!hasDraggedRef.current) {
+            onClick(e);
+          }
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onContextMenu={handleContextMenu}
+      >
       <div 
         className="flex items-center justify-center w-12 h-12 mb-2 text-white rounded-md shadow-lg group-hover:shadow-xl"
         style={{ 
@@ -129,7 +188,20 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
       <span className="text-xs font-mono text-center text-white px-2 py-1 text-shadow">
         {label}
       </span>
-    </div>
+      </div>
+      
+      {/* Context Menu */}
+      {showContextMenu && (
+        <ContextMenu
+          x={contextMenuPos.x}
+          y={contextMenuPos.y}
+          onClose={closeContextMenu}
+          menuItems={contextMenuItems}
+          targetType="Icon"
+          targetId={label}
+        />
+      )}
+    </>
   );
 };
 

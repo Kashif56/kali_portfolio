@@ -7,6 +7,7 @@ const projects = [
     technologies: ['React', 'Tailwind CSS', 'JavaScript'],
     link: 'https://github.com/username/kali-portfolio',
     image: '/images/kali-portfolio.png',
+    category: 'web-development'
   },
   {
     id: 2,
@@ -15,6 +16,7 @@ const projects = [
     technologies: ['Node.js', 'Express', 'MongoDB', 'React'],
     link: 'https://github.com/username/ecommerce-platform',
     image: '/images/ecommerce.png',
+    category: 'web-development'
   },
   {
     id: 3,
@@ -23,6 +25,7 @@ const projects = [
     technologies: ['JavaScript', 'OpenWeather API', 'HTML', 'CSS'],
     link: 'https://github.com/username/weather-app',
     image: '/images/weather-app.png',
+    category: 'mobile-apps'
   },
   {
     id: 4,
@@ -31,6 +34,16 @@ const projects = [
     technologies: ['React', 'Firebase', 'Material UI'],
     link: 'https://github.com/username/task-manager',
     image: '/images/task-manager.png',
+    category: 'web-development'
+  },
+  {
+    id: 5,
+    title: 'UI Design System',
+    description: 'A comprehensive design system with reusable components and style guidelines for web applications.',
+    technologies: ['Figma', 'Sketch', 'Adobe XD'],
+    link: 'https://github.com/username/ui-design-system',
+    image: '/images/design-system.png',
+    category: 'ui-ux-designs'
   }
 ];
 
