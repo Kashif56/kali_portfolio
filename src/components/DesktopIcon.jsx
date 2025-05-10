@@ -6,6 +6,9 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
   const [scale, setScale] = useState(1);
   const iconRef = useRef(null);
   const offset = useRef({ x: 0, y: 0 });
+  const startPosRef = useRef({ x: 0, y: 0 });
+  const hasDraggedRef = useRef(false);
+  const dragThreshold = 5; // Pixels of movement to consider it a drag
 
   // Handle mouse down for dragging
   const handleMouseDown = (e) => {
@@ -15,6 +18,12 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
         x: e.clientX - rect.left,
         y: e.clientY - rect.top
       };
+      // Store the starting position to detect if a drag occurred
+      startPosRef.current = {
+        x: e.clientX,
+        y: e.clientY
+      };
+      hasDraggedRef.current = false; // Reset drag detection
       setIsDragging(true);
       setScale(0.95); // Scale down when clicked
     }
@@ -24,6 +33,16 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
   const handleMouseMove = (e) => {
     if (isDragging) {
       e.preventDefault();
+      
+      // Calculate distance moved to determine if this is a drag
+      const dx = Math.abs(e.clientX - startPosRef.current.x);
+      const dy = Math.abs(e.clientY - startPosRef.current.y);
+      
+      // If moved more than threshold, consider it a drag
+      if (dx > dragThreshold || dy > dragThreshold) {
+        hasDraggedRef.current = true;
+      }
+      
       setPos({
         x: e.clientX - offset.current.x,
         y: e.clientY - offset.current.y
@@ -72,7 +91,12 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
         transform: `scale(${scale})`,
         transition: isDragging ? 'none' : 'transform 0.2s'
       }}
-      onClick={!isDragging ? onClick : undefined}
+      onClick={(e) => {
+        // Only trigger onClick if no significant dragging occurred
+        if (!hasDraggedRef.current) {
+          onClick(e);
+        }
+      }}
       onMouseDown={handleMouseDown}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

@@ -206,6 +206,7 @@ const Terminal = ({ onCommandExecute }) => {
         addToHistory({ text: `  contact     - Contact information`, type: 'system' });
         addToHistory({ text: `  whoami      - Display user information`, type: 'system' });
         addToHistory({ text: `  clear       - Clear terminal`, type: 'system' });
+        addToHistory({ text: `  restart     - Refresh the page`, type: 'system' });
         addToHistory({ text: `  help        - Display this help message`, type: 'system' });
         
         // Removed the extra prompt that was causing duplication
@@ -304,6 +305,14 @@ const Terminal = ({ onCommandExecute }) => {
         
         addToHistory({ text: ``, type: 'spacer' });
         addToHistory({ text: `Feel free to reach out for collaboration opportunities or to discuss projects!`, type: 'contact-msg' });
+        break;
+        
+      case 'restart':
+        addToHistory({ text: `Refreshing the page...`, type: 'system' });
+        // Use setTimeout to allow the message to be displayed before refreshing
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
         break;
         
       default:
