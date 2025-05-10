@@ -114,6 +114,36 @@ const Notepad = ({ file, onClose }) => {
         <div className="flex-1 p-4 overflow-auto">
           <div className="font-mono whitespace-pre-wrap bg-[#1e1e2e] text-[#cdd6f4] p-4 h-full overflow-auto">
             {file.content}
+            
+            {file.technologies && (
+              <div className="mt-6 border-t border-[#313244] pt-4">
+                <div className="font-bold text-[#cba6f7] mb-2">Technologies:</div>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {file.technologies.map((tech, index) => (
+                    <span 
+                      key={index} 
+                      className="bg-[#313244] text-[#cdd6f4] px-2 py-1 rounded text-xs"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {file.link && (
+              <div className="mt-2">
+                <div className="font-bold text-[#cba6f7] mb-2">Project Link:</div>
+                <a 
+                  href={file.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-[#89b4fa] hover:underline"
+                >
+                  {file.link}
+                </a>
+              </div>
+            )}
           </div>
         </div>
         

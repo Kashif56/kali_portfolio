@@ -22,52 +22,69 @@ const FileExplorer = ({ onClose }) => {
       const today = new Date();
       const formattedDate = today.toISOString().split('T')[0];
       
-      // Initialize the file system with root directory and main folders
-      const newFileSystem = {
-        '/home/kali/projects': [
-          { name: 'web-development', type: 'directory', icon: '📁' },
-          { name: 'mobile-apps', type: 'directory', icon: '📁' },
-          { name: 'ui-ux-designs', type: 'directory', icon: '📁' },
-          { name: 'pictures', type: 'directory', icon: '📁' }
-        ],
-        '/home/kali/projects/web-development': [],
-        '/home/kali/projects/mobile-apps': [],
-        '/home/kali/projects/ui-ux-designs': [],
-        '/home/kali/projects/pictures': [
-          { 
-            name: 'Kashif.png', 
-            type: 'file', 
-            icon: '🖼️', 
-            size: '965 KB',
-            modified: formattedDate,
-            content: 'Image file',
-            imageSrc: kashifImage
-          },
-          { 
-            name: 'kashif_1.jpeg', 
-            type: 'file', 
-            icon: '🖼️', 
-            size: '174 KB',
-            modified: formattedDate,
-            content: 'Image file',
-            imageSrc: kashifImage1
-          }
-        ]
-      };
+      // Get unique categories from all projects
+      const uniqueCategories = [...new Set(projects.flatMap(project => project.categories))].sort();
       
-      // Group projects by category
-      const projectsByCategory = {
-        'web-development': [],
-        'mobile-apps': [],
-        'ui-ux-designs': []
-      };
-      
-      // Categorize projects
-      projects.forEach(project => {
-        if (projectsByCategory[project.category]) {
-          projectsByCategory[project.category].push(project);
-        }
+      // Initialize projectsByCategory with all unique categories
+      const projectsByCategory = {};
+      uniqueCategories.forEach(category => {
+        projectsByCategory[category] = [];
       });
+      
+      // Add pictures category if it doesn't exist
+      if (!projectsByCategory['pictures']) {
+        projectsByCategory['pictures'] = [];
+      }
+      
+      // Categorize projects - now a project can be in multiple categories
+      projects.forEach(project => {
+        project.categories.forEach(category => {
+          if (projectsByCategory[category]) {
+            projectsByCategory[category].push(project);
+          }
+        });
+      });
+      
+      // Initialize the file system with root directory
+      const newFileSystem = {
+        '/home/kali/projects': [],
+      };
+      
+      // Add all category folders to root directory
+      Object.keys(projectsByCategory).forEach(category => {
+        newFileSystem['/home/kali/projects'].push({ 
+          name: category, 
+          type: 'directory', 
+          icon: '📁' 
+        });
+        // Initialize empty array for each category path
+        newFileSystem[`/home/kali/projects/${category}`] = [];
+      });
+      
+      // Sort the folders alphabetically in the root directory
+      newFileSystem['/home/kali/projects'].sort((a, b) => a.name.localeCompare(b.name));
+      
+      // Add images to pictures folder
+      newFileSystem['/home/kali/projects/pictures'] = [
+        { 
+          name: 'Kashif.png', 
+          type: 'file', 
+          icon: '🖼️', 
+          size: '965 KB',
+          modified: formattedDate,
+          content: 'Image file',
+          imageSrc: kashifImage
+        },
+        { 
+          name: 'kashif_1.jpeg', 
+          type: 'file', 
+          icon: '🖼️', 
+          size: '174 KB',
+          modified: formattedDate,
+          content: 'Image file',
+          imageSrc: kashifImage1
+        }
+      ];
       
       // Add project .txt files to each category folder
       Object.keys(projectsByCategory).forEach(category => {
@@ -80,7 +97,9 @@ const FileExplorer = ({ onClose }) => {
             size: `${(project.description.length / 100).toFixed(1)} KB`,
             modified: formattedDate,
             content: project.description,
-            projectId: project.id
+            projectId: project.id,
+            technologies: project.technologies,
+            link: project.link
           });
         });
       });
@@ -130,9 +149,6 @@ const FileExplorer = ({ onClose }) => {
   const handleItemDoubleClick = (item) => {
     if (item.type === 'directory') {
       navigateToDirectory(item.name);
-    } else if (item.link) {
-      // Open GitHub link in new tab
-      window.open(item.link, '_blank');
     } else if (item.content && item.name.endsWith('.txt')) {
       // Open text files in Notepad
       console.log(`Opening file in Notepad: ${item.name}`);
@@ -141,6 +157,9 @@ const FileExplorer = ({ onClose }) => {
       // Open image files in image viewer
       console.log(`Opening image: ${item.name}`);
       setOpenedImage(item);
+    } else if (item.link) {
+      // Open GitHub link in new tab
+      window.open(item.link, '_blank');
     } else {
       // For other files, show a message
       console.log(`Opening file: ${item.name}`);
@@ -220,31 +239,48 @@ const FileExplorer = ({ onClose }) => {
                     const today = new Date();
                     const formattedDate = today.toISOString().split('T')[0];
                     
-                    // Initialize the file system with root directory and three main folders
-                    const newFileSystem = {
-                      '/home/kali/projects': [
-                        { name: 'web-development', type: 'directory', icon: '📁' },
-                        { name: 'mobile-apps', type: 'directory', icon: '📁' },
-                        { name: 'ui-ux-designs', type: 'directory', icon: '📁' }
-                      ],
-                      '/home/kali/projects/web-development': [],
-                      '/home/kali/projects/mobile-apps': [],
-                      '/home/kali/projects/ui-ux-designs': []
-                    };
+                    // Get unique categories from all projects
+                    const uniqueCategories = [...new Set(projects.flatMap(project => project.categories))].sort();
                     
-                    // Group projects by category
-                    const projectsByCategory = {
-                      'web-development': [],
-                      'mobile-apps': [],
-                      'ui-ux-designs': []
-                    };
-                    
-                    // Categorize projects
-                    projects.forEach(project => {
-                      if (projectsByCategory[project.category]) {
-                        projectsByCategory[project.category].push(project);
-                      }
+                    // Initialize projectsByCategory with all unique categories
+                    const projectsByCategory = {};
+                    uniqueCategories.forEach(category => {
+                      projectsByCategory[category] = [];
                     });
+                    
+                    // Add pictures category if it doesn't exist
+                    if (!projectsByCategory['pictures']) {
+                      projectsByCategory['pictures'] = [];
+                    }
+                    
+                    // Categorize projects - now a project can be in multiple categories
+                    projects.forEach(project => {
+                      project.categories.forEach(category => {
+                        if (projectsByCategory[category]) {
+                          projectsByCategory[category].push(project);
+                        }
+                      });
+                    });
+                    
+                    // Initialize the file system with root directory
+                    const newFileSystem = {
+                      '/home/kali/projects': []
+                    };
+                    
+                    // Add all category folders to root directory
+                    Object.keys(projectsByCategory).forEach(category => {
+                      // Add folder to root directory
+                      newFileSystem['/home/kali/projects'].push({ 
+                        name: category, 
+                        type: 'directory', 
+                        icon: '📁' 
+                      });
+                      // Initialize empty array for each category path
+                      newFileSystem[`/home/kali/projects/${category}`] = [];
+                    });
+                    
+                    // Sort the folders alphabetically in the root directory
+                    newFileSystem['/home/kali/projects'].sort((a, b) => a.name.localeCompare(b.name));
                     
                     // Add project .txt files to each category folder
                     Object.keys(projectsByCategory).forEach(category => {
@@ -257,10 +293,17 @@ const FileExplorer = ({ onClose }) => {
                           size: `${(project.description.length / 100).toFixed(1)} KB`,
                           modified: formattedDate,
                           content: project.description,
-                          projectId: project.id
+                          projectId: project.id,
+                          technologies: project.technologies,
+                          link: project.link
                         });
                       });
                     });
+                    
+                    // Make sure pictures folder exists
+                    if (!newFileSystem['/home/kali/projects/pictures']) {
+                      newFileSystem['/home/kali/projects/pictures'] = [];
+                    }
                     
                     return newFileSystem;
                   };

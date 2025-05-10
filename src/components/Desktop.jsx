@@ -53,10 +53,8 @@ const Desktop = () => {
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
   const [contextMenuTarget, setContextMenuTarget] = useState({ type: '', id: '' });
   
-  // Mouse follower animation state
+  // State for mouse position (for window interactions)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [cursorParticles, setCursorParticles] = useState([]);
-  const particleIdRef = useRef(0);
   
   // Window positions for dragging (including terminal)
   const [windowPositions, setWindowPositions] = useState({ terminal: { x: 100, y: 100 } });
@@ -99,60 +97,10 @@ const Desktop = () => {
   const resizeStartMouseRef = useRef({ x: 0, y: 0 });
   const resizeTypeRef = useRef(null); // 'se', 'sw', 'ne', 'nw', 'n', 's', 'e', 'w'
   
-  // Add CSS animations for cursor effects and custom cursor
-  useEffect(() => {
-    // Create a style element
-    const styleEl = document.createElement('style');
-    // Define the animations and custom cursor
-    const css = `
-      @keyframes particleFade {
-        0% { opacity: 0.8; transform: scale(1); }
-        100% { opacity: 0; transform: scale(0); }
-      }
-      @keyframes pulseEffect {
-        0% { opacity: 0.2; transform: scale(1); }
-        50% { opacity: 0.5; transform: scale(1.1); }
-        100% { opacity: 0.2; transform: scale(1); }
-      }
-      .kali-desktop {
-        cursor: none !important;
-      }
-      .kali-desktop * {
-        cursor: none !important;
-      }
-    `;
-    styleEl.appendChild(document.createTextNode(css));
-    document.head.appendChild(styleEl);
-    
-    return () => {
-      // Clean up
-      document.head.removeChild(styleEl);
-    };
-  }, []);
-  
-  // Mouse movement handler for animation and dragging
+  // Mouse movement handler for window dragging and resizing
   const handleMouseMove = (e) => {
-    // Update mouse position for animation
+    // Update mouse position
     setMousePosition({ x: e.clientX, y: e.clientY });
-    
-    // Create new particles occasionally
-    if (Math.random() < 0.1) { // Adjust probability to control particle frequency
-      const newParticle = {
-        id: particleIdRef.current++,
-        x: e.clientX,
-        y: e.clientY,
-        size: Math.random() * 8 + 2, // Random size between 2-10px
-        color: `hsl(${Math.random() * 40 + 100}, 100%, ${Math.random() * 20 + 40}%)`, // Green hues for Kali theme
-        lifetime: 1000 // Particle lifetime in ms
-      };
-      
-      setCursorParticles(prev => [...prev, newParticle]);
-      
-      // Remove the particle after its lifetime
-      setTimeout(() => {
-        setCursorParticles(prev => prev.filter(p => p.id !== newParticle.id));
-      }, newParticle.lifetime);
-    }
     
     // Handle window dragging
     if (dragRef.current) {
@@ -731,71 +679,12 @@ const Desktop = () => {
 
   return (
     <div 
-      className="relative w-full h-screen overflow-hidden bg-kali-wallpaper kali-desktop" 
+      className="relative w-full h-screen overflow-hidden bg-kali-wallpaper" 
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onContextMenu={handleDesktopContextMenu}
     >
-      {/* Mouse follower animation */}
-      {cursorParticles.map(particle => (
-        <div
-          key={particle.id}
-          className="absolute rounded-full pointer-events-none z-50"
-          style={{ 
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-            backgroundColor: particle.color,
-            boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
-            left: `${particle.x}px`,
-            top: `${particle.y}px`,
-            opacity: 0,
-            transform: 'scale(0)',
-            animation: `particleFade ${particle.lifetime}ms ease-out forwards`
-          }}
-        />
-      ))}
-      
-      {/* Jet plane style cursor */}
-      <div className="pointer-events-none fixed z-[9999]" style={{ left: `${mousePosition.x}px`, top: `${mousePosition.y}px`, transform: 'translate(-50%, -50%)' }}>
-        {/* Jet plane SVG */}
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'rotate(-45deg)' }}>
-          {/* Jet body */}
-          <path 
-            d="M12 2L4 12H9L7 22L12 16L17 22L15 12H20L12 2Z" 
-            fill="#00ff41"
-            fillOpacity="0.3"
-            stroke="#00ff41" 
-            strokeWidth="1.5" 
-            strokeLinejoin="round"
-            style={{ filter: 'drop-shadow(0 0 3px rgba(0, 255, 65, 0.8))' }}
-          />
-          
-          {/* Jet wings highlight */}
-          <path 
-            d="M9 12L12 16L15 12" 
-            stroke="#00ff41" 
-            strokeWidth="1.5" 
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        
-        {/* Jet trail/exhaust effect */}
-        <div className="absolute w-1 h-6 bg-gradient-to-t from-transparent to-green-500" style={{ 
-          left: '50%',
-          top: '60%',
-          transform: 'translate(-50%, 0) rotate(-45deg)',
-          opacity: 0.6
-        }} />
-        
-        {/* Precise click point */}
-        <div className="absolute w-1.5 h-1.5 bg-green-500 rounded-full" style={{ 
-          left: '0',
-          top: '0',
-          transform: 'translate(-50%, -50%)',
-          boxShadow: '0 0 3px #00ff41'
-        }} />
-      </div>
+
       
       {/* Top Bar */}
       <TopBar 

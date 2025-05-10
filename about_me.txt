@@ -1,0 +1,36 @@
+
+✅ 3+ Years Experience
+✅ 20+ Projects Delivered
+✅ 5 Star Rating
+✅ On-time delivery
+
+I'm Kashif Mehmood, a highly skilled Full Stack Web Developer with 3+ years of experience building high-performance, scalable, and user-focused web applications. I specialize in Python, Django, React.js, and modern web technologies — transforming complex ideas into clean, functional, and visually appealing digital solutions. Whether you're a startup looking to launch an MVP or an established business aiming to scale, I offer end-to-end development services tailored to your unique needs.
+
+In addition to my web development expertise, I specialize in building RAG powered AI chatbots and agents designed to automate customer interactions, lead generation, and support functions. Leveraging tools such as Langchain, Python, Crew AI, and Google ADK alongside multiple LLMs, I create intelligent assistants that seamlessly integrate with platforms like WhatsApp, Email and SMS via Twilio — helping businesses operate more efficiently and effectively.
+
+I also have extensive experience in workflow automation using platforms like Make.com, Zapier, and other automation tools to streamline business processes, integrate multiple systems, and save time on repetitive tasks.
+
+Tech Stack
+- Frontend: React.js, Next.js, HTML5, CSS3, JavaScript, Bootstrap, Tailwind CSS, Redux
+- Backend: Python, Django, Django REST Framework, Flask, FastAPI, Langchain, Langgraph, Googel ADK
+- Database: PostgreSQL, MySQL, SQLite
+- Vector Stores Pinecone, ChromaDB, Qdrant, PgVector and AstraDB
+- Version Control: Git, GitHub
+- Deployment: Heroku, DigitalOcean, Railway, Linode
+
+Services I Offer
+- Custom Web Application Development
+- SaaS Development
+- E-commerce Solutions
+- API Development & Integration
+- Frontend Development
+- Backend Development
+- Real-time Features & AI Integration
+- Chatbots & AI Agents (Voice & Text)
+- Ongoing Maintenance & Support
+
+Why Choose Me?
+- Clean, scalable, and maintainable code
+- Timely delivery and clear communication
+- Deep understanding of business logic and user experience
+- Post-launch support and continuous improvement

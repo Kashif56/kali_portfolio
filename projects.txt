@@ -1,0 +1,41 @@
+Nexus AI
+Nexus AI is a full-stack Django application that enables businesses to deploy AI-powered chatbots capable of answering questions using their own documents. Leveraging Retrieval-Augmented Generation (RAG), the system integrates with web, SMS, WhatsApp, and email channels, while offering a powerful analytics dashboard to track user engagement and performance. Built with OpenAI, Pinecone, and Twilio, it provides secure knowledge base management, multi-channel communication, and real-time insights—all under a single, scalable platform.
+tech Stack: Python, Django, PostgreSQL, Pinecone, Langchain, OpenAI, Google Gemini, Django Q2, Twilio, GMail API, META APIs
+Category: Full Stack and AI Agent Development
+
+Services AI
+Services AI is a modular, AI-powered SaaS platform designed to help service-based businesses automate lead capture and engagement via SMS and voice calls. Built with Django, Twilio, and OpenAI, the system supports industry-specific workflows, intelligent appointment scheduling, and personalized AI-driven communication. It enables businesses to improve lead conversion rates through scalable automation, a customizable plugin system, and a secure admin dashboard for tracking performance and managing settings.
+tech Stack: Django, JavaScript, HTMl, CSS, Bootstrap, Open AI, Langchain, Strpe, Square, Paypal, Django Q2, Twilio
+Category:  Both
+
+CLeanng Biz AI
+CleaningBizAI is a smart automation platform tailored for cleaning businesses. It offers voice and SMS-based virtual assistants that handle client communication, booking inquiries, and follow-ups without human intervention. It’s designed to save time, increase booking rates, and provide 24/7 customer support.
+tech Stack: Django, JavaScript, HTMl, CSS, Bootstrap, Open AI, Langchain, Strpe, Square, Paypal, Django Q2, Twilio
+Category: Both
+
+
+eStore
+The Multi-Vendor E-commerce Platform aimed to create a scalable marketplace connecting buyers and sellers. Built with Django, it offers secure user management, cart functionality, and integrated payments via Stripe and COD with OTP verification. Sellers benefit from a dashboard for managing products, orders, and payouts. This project enhanced the online shopping experience, improved security, and streamlined operations, helping vendors increase sales and providing buyers with a reliable, user-friendly platform.
+React, Redux js, Tailwind CSS, Django REST Framework, PostgreSQL, HTML, CSS
+Category: Full Stack
+
+eBank
+The Custom Banking Website is a comprehensive online banking system built with Django, offering secure account management, money transactions, and service requests. Key features include OTP verification for secure operations, virtual card issuance with customizable limits, and detailed financial management tools. The system streamlines banking processes, enhances security, and provides users with a convenient platform for managing their finances, while reducing administrative workload through automated task scheduling and efficient request handling.
+Tech Stakc: JavaScript, Django, PostgreSQL, Bootsrap, HTML, CSS
+Category: Full Stack
+
+SkillNet
+Skillnet is an innovative platform designed to connect individuals looking to exchange skills and knowledge. Whether you're a developer wanting to learn graphic design or a marketer looking to pick up coding, SkillSwap provides a seamless way to barter expertise with like-minded professionals.
+tech stack: React, Redux js, Tailwind CSS, Django REST Framework, PostgreSQL, Django Channels, Web Sockets, HTML, CSS
+category: Full Stack
+
+instaSync
+InstaSync is a powerful Instagram post scheduling platform designed to help creators, businesses, and social media managers automate their content effortlessly. With an intuitive interface, users can plan, schedule, and auto-publish posts, reels, and stories with ease. Featuring AI-powered captions, hashtag suggestions, and detailed analytics, InstaSync ensures maximum engagement while saving time. Elevate your Instagram strategy with seamless automation—post smarter, not harder!
+React, Redux js, Tailwind CSS, Django REST Framework, PostgreSQL, Django-Q2, Instagram API, HTML, CSS
+category: Full Stack
+
+Avante Salon
+The Salon Management System was designed to streamline salon operations by managing staff attendance, appointments, and expenses. Built with Django, it features a user-friendly interface for tracking staff schedules and client bookings. The system also allows for detailed expense tracking, helping salon owners maintain better financial oversight. This project improved operational efficiency, reduced manual workload, and provided a centralized solution for managing daily salon activities effectively.
+tech Stack: JavaScript, Django, SQLite, Bootsrap, HTML, CSS
+Categoyr: Full Stack
+
