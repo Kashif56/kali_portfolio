@@ -456,34 +456,101 @@ const Desktop = () => {
     bringToFront(content);
   };
 
+  // Desktop icons configuration - default positions
+  const defaultIconPositions = {
+    'projects': { x: 20, y: 20 },
+    'experience': { x: 20, y: 120 },
+    'about': { x: 20, y: 220 },
+    'contact': { x: 20, y: 320 }
+  };
+  
+  // State to track icon positions
+  const [iconPositions, setIconPositions] = useState(defaultIconPositions);
+  
+  // Load saved positions from localStorage on component mount
+  useEffect(() => {
+    try {
+      const savedPositions = localStorage.getItem('desktopIconPositions');
+      if (savedPositions) {
+        const parsedPositions = JSON.parse(savedPositions);
+        // Make sure we have all the required icons
+        const completePositions = {
+          ...defaultIconPositions,
+          ...parsedPositions
+        };
+        setIconPositions(completePositions);
+      } else {
+        // Save default positions to localStorage if nothing is saved
+        localStorage.setItem('desktopIconPositions', JSON.stringify(defaultIconPositions));
+      }
+    } catch (error) {
+      console.error('Error loading icon positions from localStorage:', error);
+    }
+  }, []); // Only run on mount
+  
+  // Handle icon position changes
+  const handleIconPositionChange = (iconId, newPosition) => {
+    if (!iconId) return; // Safety check
+    
+    // Update state with the new position
+    setIconPositions(prev => {
+      const updated = {
+        ...prev,
+        [iconId]: newPosition
+      };
+      
+      // Save to localStorage immediately
+      try {
+        localStorage.setItem('desktopIconPositions', JSON.stringify(updated));
+      } catch (error) {
+        console.error('Error saving icon positions to localStorage:', error);
+      }
+      
+      return updated;
+    });
+  };
+
+  // Reset all icon positions to default
+  const resetIconPositions = () => {
+    // Set icon positions back to default
+    setIconPositions(defaultIconPositions);
+    
+    // Save default positions to localStorage
+    try {
+      localStorage.setItem('desktopIconPositions', JSON.stringify(defaultIconPositions));
+    } catch (error) {
+      console.error('Error saving default icon positions to localStorage:', error);
+    }
+  };
+  
   // Desktop icons configuration
   const desktopIcons = [
     { 
       id: 'projects', 
       label: 'Projects', 
       icon: <FolderIcon />, 
-      position: { x: 20, y: 20 },
+      position: iconPositions['projects'] || defaultIconPositions['projects'],
       bgColor: '#3498db' // Blue
     },
     { 
       id: 'experience', 
       label: 'Experience', 
       icon: <BriefcaseIcon />, 
-      position: { x: 20, y: 120 },
+      position: iconPositions['experience'] || defaultIconPositions['experience'],
       bgColor: '#9b59b6' // Purple
     },
     { 
       id: 'about', 
       label: 'About', 
       icon: <UserIcon />, 
-      position: { x: 20, y: 220 },
+      position: iconPositions['about'] || defaultIconPositions['about'],
       bgColor: '#2ecc71' // Green
     },
     { 
       id: 'contact', 
       label: 'Contact', 
       icon: <EnvelopeIcon />, 
-      position: { x: 20, y: 320 },
+      position: iconPositions['contact'] || defaultIconPositions['contact'],
       bgColor: '#e74c3c' // Red
     }
   ];
@@ -491,7 +558,10 @@ const Desktop = () => {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-kali-wallpaper">
       {/* Top Bar */}
-      <TopBar onTerminalClick={() => handleIconClick('terminal')} />
+      <TopBar 
+        onTerminalClick={() => handleIconClick('terminal')} 
+        onResetIcons={resetIconPositions} 
+      />
       {/* Desktop Icons - positioned with absolute positioning instead of grid */}
       {desktopIcons.map((icon, index) => {
         // Calculate position with offset to avoid the top bar
@@ -503,11 +573,13 @@ const Desktop = () => {
         return (
           <DesktopIcon 
             key={icon.id}
+            id={icon.id}
             icon={icon.icon}
             label={icon.label}
             position={position}
             bgColor={icon.bgColor}
             onClick={() => handleIconClick(icon.id)}
+            onPositionChange={handleIconPositionChange}
           />
         );
       })}

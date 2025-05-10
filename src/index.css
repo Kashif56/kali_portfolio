@@ -43,6 +43,12 @@ body {
   100% { width: 100%; }
 }
 
+/* Fade-in animation for desktop */
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
 /* Text shadow for better readability on dark backgrounds */
 .text-shadow {
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.8), 0 0 5px rgba(0, 0, 0, 0.6);
@@ -51,6 +57,10 @@ body {
 .animate-boot-progress {
   animation: boot-progress 2s ease-in-out;
   width: 100%;
+}
+
+.animate-fade-in {
+  animation: fade-in 1s ease-in-out;
 }
 
 /* Make desktop icons draggable */
@@ -90,4 +100,13 @@ body {
 
 .terminal-flash {
   animation: terminal-flash 0.2s ease-out;
+}
+
+/* Prevent text selection during dragging */
+.no-select {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  cursor: grabbing !important;
 }

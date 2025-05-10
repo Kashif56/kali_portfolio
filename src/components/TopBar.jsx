@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const TopBar = ({ onTerminalClick }) => {
+const TopBar = ({ onTerminalClick, onResetIcons }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [networkStrength, setNetworkStrength] = useState(4); // 0-4 for network strength
   
@@ -104,10 +104,19 @@ const TopBar = ({ onTerminalClick }) => {
     );
   };
 
+  // Reset icon component
+  const ResetIcon = () => {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+    );
+  };
+
   return (
     <div className="fixed w-full top-0 left-0 px-3 py-1.5 bg-[#1a1a1a]/90 text-[#00ff41] font-mono text-xs flex items-center justify-between border-b border-[#00ff41]/20 backdrop-blur-sm z-50 shadow-md">
-      {/* Left side - Terminal button */}
-      <div className="flex items-center">
+      {/* Left side - Terminal button and Reset button */}
+      <div className="flex items-center space-x-3">
         <button 
           onClick={onTerminalClick}
           className="flex items-center space-x-2 px-3 py-1 rounded hover:bg-[#00ff41]/10 transition-colors group relative"
@@ -115,6 +124,15 @@ const TopBar = ({ onTerminalClick }) => {
           <TerminalIcon />
           <span>Terminal</span>
           <span className="absolute -bottom-6 left-0 bg-[#1a1a1a] text-[#00ff41] text-xs py-0.5 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Open Terminal</span>
+        </button>
+
+        <button 
+          onClick={onResetIcons}
+          className="flex items-center space-x-2 px-3 py-1 rounded hover:bg-[#00ff41]/10 transition-colors group relative"
+        >
+          <ResetIcon />
+          <span>Reset Icons</span>
+          <span className="absolute -bottom-6 left-0 bg-[#1a1a1a] text-[#00ff41] text-xs py-0.5 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Reset Bins</span>
         </button>
       </div>
       

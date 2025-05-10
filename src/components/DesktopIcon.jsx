@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor = "#2c3e50" }) => {
+const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor = "#2c3e50", id, onPositionChange }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [pos, setPos] = useState(position);
   const [scale, setScale] = useState(1);
   const iconRef = useRef(null);
   const offset = useRef({ x: 0, y: 0 });
@@ -13,6 +12,9 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
   // Handle mouse down for dragging
   const handleMouseDown = (e) => {
     if (iconRef.current) {
+      // Prevent default to avoid text selection
+      e.preventDefault();
+      
       const rect = iconRef.current.getBoundingClientRect();
       offset.current = {
         x: e.clientX - rect.left,
@@ -26,6 +28,9 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
       hasDraggedRef.current = false; // Reset drag detection
       setIsDragging(true);
       setScale(0.95); // Scale down when clicked
+      
+      // Add a class to the body to prevent text selection during drag
+      document.body.classList.add('no-select');
     }
   };
 
@@ -43,10 +48,16 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
         hasDraggedRef.current = true;
       }
       
-      setPos({
+      // Calculate new position
+      const newPos = {
         x: e.clientX - offset.current.x,
         y: e.clientY - offset.current.y
-      });
+      };
+      
+      // Update position in parent component directly
+      if (onPositionChange) {
+        onPositionChange(id, newPos);
+      }
     }
   };
 
@@ -54,6 +65,9 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
   const handleMouseUp = () => {
     setIsDragging(false);
     setScale(1); // Reset scale
+    
+    // Remove the no-select class from body
+    document.body.classList.remove('no-select');
   };
 
   // Add and remove event listeners
@@ -86,10 +100,12 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
       ref={iconRef}
       className={`absolute flex flex-col items-center justify-center w-20 h-24 p-2 cursor-pointer group ${isDragging ? 'dragging' : 'draggable'}`}
       style={{
-        left: `${pos.x}px`,
-        top: `${pos.y}px`,
+        left: `${position.x}px`,
+        top: `${position.y}px`,
         transform: `scale(${scale})`,
-        transition: isDragging ? 'none' : 'transform 0.2s'
+        transition: isDragging ? 'none' : 'all 0.2s',
+        userSelect: 'none',
+        touchAction: 'none'
       }}
       onClick={(e) => {
         // Only trigger onClick if no significant dragging occurred
