@@ -6,7 +6,19 @@ import personalInfo from '../data/personal';
 const Terminal = ({ onCommandExecute }) => {
   const [input, setInput] = useState('');
   const [history, setHistory] = useState([
-    { text: 'Welcome to Kali Portfolio Terminal', type: 'system' },
+    { text: '┌──────────────────────────────────────────────────────┐', type: 'header' },
+    { text: '│                                                      │', type: 'header' },
+    { text: '│   ██╗  ██╗ █████╗ ███████╗██╗  ██╗██╗███████╗      │', type: 'kali-ascii' },
+    { text: '│   ██║ ██╔╝██╔══██╗██╔════╝██║  ██║██║██╔════╝      │', type: 'kali-ascii' },
+    { text: '│   █████╔╝ ███████║███████╗███████║██║█████╗        │', type: 'kali-ascii' },
+    { text: '│   ██╔═██╗ ██╔══██║╚════██║██╔══██║██║██╔══╝        │', type: 'kali-ascii' },
+    { text: '│   ██║  ██╗██║  ██║███████║██║  ██║██║██║           │', type: 'kali-ascii' },
+    { text: '│   ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝           │', type: 'kali-ascii' },
+    { text: '│                                        PORTFOLIO    │', type: 'kali-ascii' },
+    { text: '│                                                      │', type: 'header' },
+    { text: '└──────────────────────────────────────────────────────┘', type: 'header' },
+    { text: ' ', type: 'spacer' },
+    { text: 'Welcome to Kali Portfolio Terminal [Version 1.0.0]', type: 'system' },
     { text: 'Type "help" to see available commands', type: 'system' }
   ]);
   const [commandHistory, setCommandHistory] = useState([]);
@@ -327,8 +339,15 @@ const Terminal = ({ onCommandExecute }) => {
   return (
     <div 
       ref={terminalRef}
-      className="flex-1 p-4 overflow-y-auto font-mono text-sm text-[#00ff00] bg-black h-full"
+      className="flex-1 p-4 overflow-y-auto font-mono text-sm text-kali-green bg-black h-full relative"
     >
+      {/* Kali Linux watermark */}
+      <div className="absolute bottom-4 right-4 opacity-10 pointer-events-none">
+        <svg width="120" height="120" viewBox="0 0 24 24" className="text-kali-blue">
+          <path fill="currentColor" d="M11.503 12.216c-.119.522.344 1.132.861 1.132.378 0 .787-.317.889-.883.104-.585-.318-1.142-.798-1.142-.41-.001-.857.329-.952.893z"/>
+          <path fill="currentColor" d="M20.772 6.695c-.214-.446-.524-.88-.924-1.28a5.313 5.313 0 0 0-1.279-.923c-1.288-.619-2.877-.618-4.166 0a5.313 5.313 0 0 0-1.279.923c-.4.4-.709.834-.924 1.28-.213.446-.321.901-.321 1.36 0 .459.108.914.321 1.36.214.446.524.88.924 1.28.4.4.834.709 1.279.923.644.31 1.367.464 2.089.464s1.445-.155 2.088-.464a5.313 5.313 0 0 0 1.279-.923c.4-.4.709-.834.924-1.28.213-.446.321-.901.321-1.36 0-.459-.108-.914-.332-1.36zm-2.538 2.283c-.199.199-.437.348-.713.464-.574.243-1.292.243-1.866 0a2.637 2.637 0 0 1-.713-.464c-.199-.199-.348-.437-.464-.713-.243-.574-.243-1.292 0-1.866.116-.276.265-.514.464-.713.199-.199.437-.348.713-.464.574-.243 1.292-.243 1.866 0 .276.116.514.265.713.464.199.199.348.437.464.713.243.574.243 1.292 0 1.866-.116.276-.265.514-.464.713z"/>
+        </svg>
+      </div>
         {history.map((entry, index) => {
           // Define styling based on entry type
           let className = 'mb-1 ';
@@ -345,6 +364,9 @@ const Terminal = ({ onCommandExecute }) => {
               break;
             case 'header':
               className += 'text-yellow-300 font-bold';
+              break;
+            case 'kali-ascii':
+              className += 'text-kali-blue font-bold';
               break;
             case 'project-title':
             case 'exp-title':
@@ -389,7 +411,13 @@ const Terminal = ({ onCommandExecute }) => {
         
         {/* Current input line - using monospace characters and custom cursor */}
         <div className="flex items-center">
-          <span className="text-[#00ff00]">root@kali:~#&nbsp;</span>
+          <span className="text-kali-green font-bold">┌──(</span>
+          <span className="text-red-500 font-bold">root💀kali</span>
+          <span className="text-kali-green font-bold">)-[</span>
+          <span className="text-blue-400 font-bold">~</span>
+          <span className="text-kali-green font-bold">]</span>
+          <br/>
+          <span className="text-kali-green font-bold">└─#&nbsp;</span>
           <div className="relative font-mono">
             {/* Display text with cursor overlay at the correct position */}
             <div className="relative h-5 flex items-center">
