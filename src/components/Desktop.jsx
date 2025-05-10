@@ -50,38 +50,133 @@ const Desktop = () => {
   // Window positions for dragging (including terminal)
   const [windowPositions, setWindowPositions] = useState({ terminal: { x: 100, y: 100 } });
   
+  // Window sizes for resizing (including terminal)
+  const [windowSizes, setWindowSizes] = useState({ 
+    terminal: { width: 600, height: 400 },
+    // Default sizes for content windows will be set when opened
+  });
+  
   // Window focus management (z-index ordering)
   const [focusOrder, setFocusOrder] = useState(['terminal']);
   
-  // References for drag handling
+  // References for drag and resize handling
   const dragRef = useRef(null);
+  const resizeRef = useRef(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const resizeStartRef = useRef({ width: 0, height: 0 });
+  const resizeStartPositionRef = useRef({ x: 0, y: 0 });
+  const resizeStartMouseRef = useRef({ x: 0, y: 0 });
+  const resizeTypeRef = useRef(null); // 'se', 'sw', 'ne', 'nw', 'n', 's', 'e', 'w'
   
-  // Set up event listeners for dragging
+  // Set up event listeners for dragging and resizing
   useEffect(() => {
     const handleMouseMove = (e) => {
-      if (!dragRef.current) return;
+      // Handle window dragging
+      if (dragRef.current) {
+        // Calculate new position
+        const newPosition = {
+          x: e.clientX - dragOffsetRef.current.x,
+          y: e.clientY - dragOffsetRef.current.y
+        };
+        
+        // Update position
+        setWindowPositions(prev => ({
+          ...prev,
+          [dragRef.current]: newPosition
+        }));
+      }
       
-      // Calculate new position
-      const newPosition = {
-        x: e.clientX - dragOffsetRef.current.x,
-        y: e.clientY - dragOffsetRef.current.y
-      };
-      
-      // Update position
-      setWindowPositions(prev => ({
-        ...prev,
-        [dragRef.current]: newPosition
-      }));
+      // Handle window resizing
+      if (resizeRef.current && resizeTypeRef.current) {
+        const windowId = resizeRef.current;
+        const resizeType = resizeTypeRef.current;
+        const startSize = resizeStartRef.current;
+        const startPosition = resizeStartPositionRef.current;
+        
+        // Calculate mouse movement deltas
+        const deltaX = e.clientX - resizeStartMouseRef.current.x;
+        const deltaY = e.clientY - resizeStartMouseRef.current.y;
+        
+        // Initialize new dimensions and position
+        let newWidth = startSize.width;
+        let newHeight = startSize.height;
+        let newX = startPosition.x;
+        let newY = startPosition.y;
+        
+        // Apply resize based on handle type
+        switch (resizeType) {
+          case 'se': // bottom-right
+            newWidth = Math.max(200, startSize.width + deltaX);
+            newHeight = Math.max(200, startSize.height + deltaY);
+            break;
+            
+          case 'sw': // bottom-left
+            newWidth = Math.max(200, startSize.width - deltaX);
+            newX = startPosition.x + startSize.width - newWidth;
+            newHeight = Math.max(200, startSize.height + deltaY);
+            break;
+            
+          case 'ne': // top-right
+            newWidth = Math.max(200, startSize.width + deltaX);
+            newHeight = Math.max(200, startSize.height - deltaY);
+            newY = startPosition.y + startSize.height - newHeight;
+            break;
+            
+          case 'nw': // top-left
+            newWidth = Math.max(200, startSize.width - deltaX);
+            newHeight = Math.max(200, startSize.height - deltaY);
+            newX = startPosition.x + startSize.width - newWidth;
+            newY = startPosition.y + startSize.height - newHeight;
+            break;
+            
+          case 'n': // top
+            newHeight = Math.max(200, startSize.height - deltaY);
+            newY = startPosition.y + startSize.height - newHeight;
+            break;
+            
+          case 's': // bottom
+            newHeight = Math.max(200, startSize.height + deltaY);
+            break;
+            
+          case 'e': // right
+            newWidth = Math.max(200, startSize.width + deltaX);
+            break;
+            
+          case 'w': // left
+            newWidth = Math.max(200, startSize.width - deltaX);
+            newX = startPosition.x + startSize.width - newWidth;
+            break;
+            
+          default:
+            break;
+        }
+        
+        // Update window size
+        setWindowSizes(prev => ({
+          ...prev,
+          [windowId]: { width: newWidth, height: newHeight }
+        }));
+        
+        // Update position if needed (for resizing from left or top)
+        if (newX !== position.x || newY !== position.y) {
+          setWindowPositions(prev => ({
+            ...prev,
+            [windowId]: { x: newX, y: newY }
+          }));
+        }
+      }
     };
     
     const handleMouseUp = () => {
       dragRef.current = null;
+      resizeRef.current = null;
+      resizeTypeRef.current = null;
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'default';
     };
     
-    if (dragRef.current) {
+    if (dragRef.current || resizeRef.current) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
@@ -89,8 +184,9 @@ const Desktop = () => {
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'default';
     };
-  }, [dragRef.current]);
+  }, [dragRef.current, resizeRef.current, windowPositions]);
   
   // Handle window focus
   const bringToFront = (windowId) => {
@@ -110,44 +206,123 @@ const Desktop = () => {
     // Bring window to front
     bringToFront(windowId);
     
-    // Calculate offset between mouse position and window position
-    const rect = e.currentTarget.getBoundingClientRect();
+    // Get window position
+    const position = windowPositions[windowId] || { x: 0, y: 0 };
+    
+    // Set drag offset
     dragOffsetRef.current = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
     };
     
-    // Set dragging state
+    // Set active drag reference
     dragRef.current = windowId;
+    document.body.style.cursor = 'grabbing';
   };
   
+  // Start resizing a window
+  const handleStartResize = (e, windowId, resizeType) => {
+    // Prevent default behavior
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Bring window to front
+    bringToFront(windowId);
+    
+    // Get current window size and position
+    const size = windowSizes[windowId] || { width: 600, height: 400 };
+    const position = windowPositions[windowId] || { x: 0, y: 0 };
+    
+    // Store initial values
+    resizeStartRef.current = {
+      width: size.width,
+      height: size.height
+    };
+    
+    resizeStartPositionRef.current = {
+      x: position.x,
+      y: position.y
+    };
+    
+    // Store initial mouse position
+    resizeStartMouseRef.current = {
+      x: e.clientX,
+      y: e.clientY
+    };
+    
+    // Set active resize references
+    resizeRef.current = windowId;
+    resizeTypeRef.current = resizeType;
+    
+    // Set cursor based on resize type
+    switch (resizeType) {
+      case 'se': case 'nw':
+        document.body.style.cursor = 'nwse-resize';
+        break;
+      case 'sw': case 'ne':
+        document.body.style.cursor = 'nesw-resize';
+        break;
+      case 'n': case 's':
+        document.body.style.cursor = 'ns-resize';
+        break;
+      case 'e': case 'w':
+        document.body.style.cursor = 'ew-resize';
+        break;
+      default:
+        document.body.style.cursor = 'default';
+    }
+  };
+
   // Handle icon click
   const handleIconClick = (content) => {
+    // If terminal icon
     if (content === 'terminal') {
-      setShowTerminal(true);
-      setTerminalMinimized(false);
+      // If terminal is already open, toggle minimize state
+      if (showTerminal) {
+        setTerminalMinimized(!terminalMinimized);
+      } else {
+        // Show terminal
+        setShowTerminal(true);
+        setTerminalMinimized(false);
+      }
+      
+      // Bring terminal to front
       bringToFront('terminal');
-    } else {
+    } 
+    // If content window
+    else {
       // Check if window is already open
-      if (!openWindows.includes(content)) {
+      if (openWindows.includes(content)) {
+        // If minimized, restore it
+        if (minimizedWindows[content]) {
+          setMinimizedWindows(prev => ({
+            ...prev,
+            [content]: false
+          }));
+        }
+        
+        // Bring to front
+        bringToFront(content);
+      } else {
+        // Open new window
         setOpenWindows(prev => [...prev, content]);
-        // Add to focus order (bring to front)
-        setFocusOrder(prev => [...prev, content]);
-        // Set initial position with slight offset based on number of windows
-        const offset = openWindows.length * 20;
+        
+        // Position window with offset from previous windows
+        const offset = openWindows.length * 30 + 50;
         setWindowPositions(prev => ({
           ...prev,
-          [content]: { x: 50 + offset, y: 50 + offset }
+          [content]: { x: offset, y: offset }
         }));
-      } else {
-        // If already open, just bring to front
-        bringToFront(content);
+        
+        // Set default window size
+        setWindowSizes(prev => ({
+          ...prev,
+          [content]: { width: 800, height: 600 }
+        }));
+        
+        // Add to focus order
+        setFocusOrder(prev => [...prev, content]);
       }
-      // Ensure it's not minimized
-      setMinimizedWindows(prev => ({
-        ...prev,
-        [content]: false
-      }));
     }
   };
 
@@ -249,23 +424,17 @@ const Desktop = () => {
       {/* Terminal Window */}
       {showTerminal && (
         <div 
-          className={`absolute ${dragRef.current === 'terminal' ? 'cursor-grabbing' : 'cursor-grab'} ${
-            terminalMinimized 
-              ? 'w-64 h-10 bottom-0 left-0' 
-              : 'rounded-md overflow-hidden shadow-2xl'
-          }`}
+          className={`absolute ${dragRef.current === 'terminal' ? 'cursor-grabbing' : 'cursor-grab'} ${terminalMinimized ? 'w-64 h-10 bottom-0 left-0' : 'rounded-md overflow-hidden shadow-2xl'}`}
           style={{
             top: terminalMinimized ? 'auto' : `${windowPositions.terminal?.y || 100}px`,
             left: terminalMinimized ? '0' : `${windowPositions.terminal?.x || 100}px`,
-            width: terminalMinimized ? '16rem' : '80%',
-            height: terminalMinimized ? '2.5rem' : '80%',
-            maxWidth: '1200px',
-            maxHeight: '800px',
+            width: terminalMinimized ? '16rem' : `${windowSizes.terminal?.width || 600}px`,
+            height: terminalMinimized ? '2.5rem' : `${windowSizes.terminal?.height || 400}px`,
             zIndex: focusOrder.indexOf('terminal') + 100
           }}
           onClick={() => bringToFront('terminal')}
         >
-          <div className="w-full h-full flex flex-col bg-[#1e1e2e] rounded-md overflow-hidden shadow-2xl border border-[#30363d]">
+          <div className="w-full h-full flex flex-col bg-[#1e1e2e] rounded-md overflow-hidden shadow-2xl border border-[#30363d] relative">
             {/* Terminal header with controls */}
             <div 
               className="flex items-center px-4 py-2 bg-[#0d1117] border-b border-[#30363d] cursor-move"
@@ -305,6 +474,47 @@ const Desktop = () => {
                 <Terminal onCommandExecute={handleCommandExecute} />
               </div>
             )}
+            
+            {/* Resize handles (only visible when not minimized) */}
+            {!terminalMinimized && (
+              <>
+                {/* Corner resize handles */}
+                <div 
+                  className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-10"
+                  onMouseDown={(e) => handleStartResize(e, 'terminal', 'se')}
+                />
+                <div 
+                  className="absolute bottom-0 left-0 w-4 h-4 cursor-nesw-resize z-10"
+                  onMouseDown={(e) => handleStartResize(e, 'terminal', 'sw')}
+                />
+                <div 
+                  className="absolute top-0 right-0 w-4 h-4 cursor-nesw-resize z-10"
+                  onMouseDown={(e) => handleStartResize(e, 'terminal', 'ne')}
+                />
+                <div 
+                  className="absolute top-0 left-0 w-4 h-4 cursor-nwse-resize z-10"
+                  onMouseDown={(e) => handleStartResize(e, 'terminal', 'nw')}
+                />
+                
+                {/* Edge resize handles */}
+                <div 
+                  className="absolute top-0 left-4 right-4 h-1 cursor-ns-resize z-10"
+                  onMouseDown={(e) => handleStartResize(e, 'terminal', 'n')}
+                />
+                <div 
+                  className="absolute bottom-0 left-4 right-4 h-1 cursor-ns-resize z-10"
+                  onMouseDown={(e) => handleStartResize(e, 'terminal', 's')}
+                />
+                <div 
+                  className="absolute left-0 top-4 bottom-4 w-1 cursor-ew-resize z-10"
+                  onMouseDown={(e) => handleStartResize(e, 'terminal', 'w')}
+                />
+                <div 
+                  className="absolute right-0 top-4 bottom-4 w-1 cursor-ew-resize z-10"
+                  onMouseDown={(e) => handleStartResize(e, 'terminal', 'e')}
+                />
+              </>
+            )}
           </div>
         </div>
       )}
@@ -328,15 +538,13 @@ const Desktop = () => {
             style={{
               top: isMinimized ? 'auto' : `${position.y}px`,
               left: isMinimized ? 'auto' : `${position.x}px`,
-              width: isMinimized ? '16rem' : '80%',
-              height: isMinimized ? '2.5rem' : '80%',
-              maxWidth: '1200px',
-              maxHeight: '800px',
+              width: isMinimized ? '16rem' : `${windowSizes[windowContent]?.width || 800}px`,
+              height: isMinimized ? '2.5rem' : `${windowSizes[windowContent]?.height || 600}px`,
               zIndex: zIndex
             }}
             onClick={() => bringToFront(windowContent)}
           >
-            <div className="w-full h-full flex flex-col bg-[#1e1e2e] rounded-md overflow-hidden shadow-2xl border border-[#30363d]">
+            <div className="w-full h-full flex flex-col bg-[#1e1e2e] rounded-md overflow-hidden shadow-2xl border border-[#30363d] relative">
               {/* Content header with controls */}
               <div 
                 className="flex items-center px-4 py-2 bg-[#0d1117] border-b border-[#30363d] cursor-move"
@@ -377,6 +585,47 @@ const Desktop = () => {
                 <div className="flex-1 p-8 overflow-y-auto">
                   <ContentRenderer activeContent={windowContent} />
                 </div>
+              )}
+              
+              {/* Resize handles (only visible when not minimized) */}
+              {!isMinimized && (
+                <>
+                  {/* Corner resize handles */}
+                  <div 
+                    className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-10"
+                    onMouseDown={(e) => handleStartResize(e, windowContent, 'se')}
+                  />
+                  <div 
+                    className="absolute bottom-0 left-0 w-4 h-4 cursor-nesw-resize z-10"
+                    onMouseDown={(e) => handleStartResize(e, windowContent, 'sw')}
+                  />
+                  <div 
+                    className="absolute top-0 right-0 w-4 h-4 cursor-nesw-resize z-10"
+                    onMouseDown={(e) => handleStartResize(e, windowContent, 'ne')}
+                  />
+                  <div 
+                    className="absolute top-0 left-0 w-4 h-4 cursor-nwse-resize z-10"
+                    onMouseDown={(e) => handleStartResize(e, windowContent, 'nw')}
+                  />
+                  
+                  {/* Edge resize handles */}
+                  <div 
+                    className="absolute top-0 left-4 right-4 h-1 cursor-ns-resize z-10"
+                    onMouseDown={(e) => handleStartResize(e, windowContent, 'n')}
+                  />
+                  <div 
+                    className="absolute bottom-0 left-4 right-4 h-1 cursor-ns-resize z-10"
+                    onMouseDown={(e) => handleStartResize(e, windowContent, 's')}
+                  />
+                  <div 
+                    className="absolute left-0 top-4 bottom-4 w-1 cursor-ew-resize z-10"
+                    onMouseDown={(e) => handleStartResize(e, windowContent, 'w')}
+                  />
+                  <div 
+                    className="absolute right-0 top-4 bottom-4 w-1 cursor-ew-resize z-10"
+                    onMouseDown={(e) => handleStartResize(e, windowContent, 'e')}
+                  />
+                </>
               )}
             </div>
           </div>
