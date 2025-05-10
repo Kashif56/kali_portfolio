@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 } }) => {
+const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor = "#2c3e50" }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [pos, setPos] = useState(position);
   const [scale, setScale] = useState(1);
@@ -77,10 +77,16 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 } }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="flex items-center justify-center w-12 h-12 mb-2 text-white bg-gray-800 rounded-md group-hover:bg-blue-600">
+      <div 
+        className="flex items-center justify-center w-12 h-12 mb-2 text-white rounded-md shadow-lg group-hover:shadow-xl"
+        style={{ 
+          backgroundColor: bgColor,
+          boxShadow: `0 4px 6px rgba(0, 0, 0, 0.3), 0 0 10px ${bgColor}40`
+        }}
+      >
         {icon}
       </div>
-      <span className="text-xs font-mono text-center text-white bg-black bg-opacity-50 rounded px-1 py-0.5">
+      <span className="text-xs font-mono text-center text-white px-2 py-1 text-shadow">
         {label}
       </span>
     </div>

@@ -2,35 +2,41 @@ import React, { useState, useEffect, useRef } from 'react';
 import DesktopIcon from './DesktopIcon';
 import Terminal from './Terminal';
 import ContentRenderer from './ContentRenderer';
+import TopBar from './TopBar';
 
-// Custom icon components
+// Custom icon components with colors
 const FolderIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+    <path d="M5 9h14v10H5z" fill="white" fillOpacity="0.3" />
   </svg>
 );
 
 const TerminalIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    <path d="M5 7h14v12H5z" fill="white" fillOpacity="0.3" />
   </svg>
 );
 
 const UserIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    <circle cx="12" cy="7" r="3" fill="white" fillOpacity="0.3" />
   </svg>
 );
 
 const EnvelopeIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    <path d="M5 8h14v10H5z" fill="white" fillOpacity="0.3" />
   </svg>
 );
 
 const BriefcaseIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    <path d="M5 9h14v10H5z" fill="white" fillOpacity="0.3" />
   </svg>
 );
 
@@ -191,36 +197,43 @@ const Desktop = () => {
       id: 'projects', 
       label: 'Projects', 
       icon: <FolderIcon />, 
-      position: { x: 20, y: 20 } 
+      position: { x: 20, y: 20 },
+      bgColor: '#3498db' // Blue
     },
     { 
       id: 'experience', 
       label: 'Experience', 
       icon: <BriefcaseIcon />, 
-      position: { x: 20, y: 120 } 
+      position: { x: 20, y: 120 },
+      bgColor: '#9b59b6' // Purple
     },
     { 
       id: 'about', 
       label: 'About', 
       icon: <UserIcon />, 
-      position: { x: 20, y: 220 } 
+      position: { x: 20, y: 220 },
+      bgColor: '#2ecc71' // Green
     },
     { 
       id: 'contact', 
       label: 'Contact', 
       icon: <EnvelopeIcon />, 
-      position: { x: 20, y: 320 } 
+      position: { x: 20, y: 320 },
+      bgColor: '#e74c3c' // Red
     },
     { 
       id: 'terminal', 
       label: 'Terminal', 
       icon: <TerminalIcon />, 
-      position: { x: 20, y: 420 } 
+      position: { x: 20, y: 420 },
+      bgColor: '#f39c12' // Orange
     }
   ];
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gray-900 bg-kali-wallpaper bg-cover bg-center">
+    <div className="relative w-full h-screen overflow-hidden bg-kali-wallpaper">
+      {/* Top Bar */}
+      <TopBar />
       {/* Desktop Icons */}
       {desktopIcons.map((icon) => (
         <DesktopIcon
@@ -228,6 +241,7 @@ const Desktop = () => {
           icon={icon.icon}
           label={icon.label}
           position={icon.position}
+          bgColor={icon.bgColor}
           onClick={() => handleIconClick(icon.id)}
         />
       ))}
