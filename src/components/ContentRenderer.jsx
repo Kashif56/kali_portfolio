@@ -3,6 +3,7 @@ import projects from '../data/projects';
 import experiences from '../data/experience';
 import personalInfo from '../data/personal';
 import FileExplorer from './FileExplorer';
+import kashifImage from '../assets/kashif/Kashif.png';
 
 const ContentRenderer = ({ activeContent }) => {
   const [viewMode, setViewMode] = useState('default'); // 'default' or 'explorer'
@@ -106,12 +107,12 @@ const ContentRenderer = ({ activeContent }) => {
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/3">
             <div className="w-40 h-40 mx-auto bg-[#0d1117] rounded-full overflow-hidden border-2 border-[#00ff00]">
-              {/* Placeholder for profile image */}
-              <div className="w-full h-full flex items-center justify-center text-[#00ff00]">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
+              {/* Profile image */}
+              <img 
+                src={kashifImage} 
+                alt="Kashif Profile" 
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="mt-4 p-3 bg-[#0d1117] rounded-md border border-[#30363d]">
               <h3 className="text-center text-lg font-mono font-semibold text-[#00ff00]">{personalInfo.name}</h3>

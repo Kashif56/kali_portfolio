@@ -62,6 +62,9 @@ const Desktop = () => {
     // Default sizes for content windows will be set when opened
   });
   
+  // Track maximized windows
+  const [maximizedWindows, setMaximizedWindows] = useState({});
+  
   // Window focus management (z-index ordering)
   const [focusOrder, setFocusOrder] = useState([]);
   
@@ -461,6 +464,15 @@ const Desktop = () => {
     }));
     bringToFront(content);
   };
+  
+  // Handle maximize/restore window
+  const handleMaximizeWindow = (windowId) => {
+    setMaximizedWindows(prev => ({
+      ...prev,
+      [windowId]: !prev[windowId]
+    }));
+    bringToFront(windowId);
+  };
 
   // Desktop icons configuration - default positions
   const defaultIconPositions = {
@@ -750,11 +762,12 @@ const Desktop = () => {
         <div 
           className="absolute rounded-md overflow-hidden shadow-2xl"
           style={{
-            top: `${windowPositions.terminal?.y || (window.innerHeight * 0.1)}px`,
-            left: `${windowPositions.terminal?.x || (window.innerWidth * 0.1)}px`,
-            width: `${windowSizes.terminal?.width || (window.innerWidth * 0.8)}px`,
-            height: `${windowSizes.terminal?.height || (window.innerHeight * 0.8)}px`,
-            zIndex: focusOrder.indexOf('terminal') + 100
+            top: maximizedWindows['terminal'] ? '0' : `${windowPositions.terminal?.y || (window.innerHeight * 0.1)}px`,
+            left: maximizedWindows['terminal'] ? '0' : `${windowPositions.terminal?.x || (window.innerWidth * 0.1)}px`,
+            width: maximizedWindows['terminal'] ? '100%' : `${windowSizes.terminal?.width || (window.innerWidth * 0.8)}px`,
+            height: maximizedWindows['terminal'] ? '100%' : `${windowSizes.terminal?.height || (window.innerHeight * 0.8)}px`,
+            zIndex: focusOrder.indexOf('terminal') + 100,
+            transition: 'width 0.2s, height 0.2s, top 0.2s, left 0.2s'
           }}
           onClick={() => bringToFront('terminal')}
         >
@@ -784,6 +797,26 @@ const Desktop = () => {
                     <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
                   </svg>
                   <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Minimize Terminal</span>
+                </div>
+                
+                {/* Maximize button with icon */}
+                <div 
+                  className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent dragging when clicking button
+                    handleMaximizeWindow('terminal');
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                    {maximizedWindows['terminal'] ? (
+                      <path fillRule="evenodd" d="M5 4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V5a1 1 0 00-1-1H5zm0 1h10v10H5V5z" clipRule="evenodd" />
+                    ) : (
+                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm1 0v12h12V4H4z" clipRule="evenodd" />
+                    )}
+                  </svg>
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">
+                    {maximizedWindows['terminal'] ? 'Restore Terminal' : 'Maximize Terminal'}
+                  </span>
                 </div>
                 
                 {/* Close button with icon */}
@@ -869,11 +902,12 @@ const Desktop = () => {
             key={windowContent}
             className="absolute rounded-md overflow-hidden shadow-2xl"
             style={{
-              top: `${position.y}px`,
-              left: `${position.x}px`,
-              width: `${windowSizes[windowContent]?.width || (window.innerWidth * 0.8)}px`,
-              height: `${windowSizes[windowContent]?.height || (window.innerHeight * 0.8)}px`,
-              zIndex: zIndex
+              top: maximizedWindows[windowContent] ? '0' : `${position.y}px`,
+              left: maximizedWindows[windowContent] ? '0' : `${position.x}px`,
+              width: maximizedWindows[windowContent] ? '100%' : `${windowSizes[windowContent]?.width || (window.innerWidth * 0.8)}px`,
+              height: maximizedWindows[windowContent] ? '100%' : `${windowSizes[windowContent]?.height || (window.innerHeight * 0.8)}px`,
+              zIndex: zIndex,
+              transition: 'width 0.2s, height 0.2s, top 0.2s, left 0.2s'
             }}
             onClick={() => bringToFront(windowContent)}
           >
@@ -907,6 +941,26 @@ const Desktop = () => {
                       <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
                     </svg>
                     <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Minimize Window</span>
+                  </div>
+                  
+                  {/* Maximize button with icon */}
+                  <div 
+                    className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent dragging when clicking button
+                      handleMaximizeWindow(windowContent);
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                      {maximizedWindows[windowContent] ? (
+                        <path fillRule="evenodd" d="M5 4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V5a1 1 0 00-1-1H5zm0 1h10v10H5V5z" clipRule="evenodd" />
+                      ) : (
+                        <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm1 0v12h12V4H4z" clipRule="evenodd" />
+                      )}
+                    </svg>
+                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">
+                      {maximizedWindows[windowContent] ? 'Restore Window' : 'Maximize Window'}
+                    </span>
                   </div>
                   
                   {/* Close button with icon */}
