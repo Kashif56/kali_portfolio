@@ -43,7 +43,7 @@ const BriefcaseIcon = () => (
 const Desktop = () => {
   // Replace single activeContent with array of open windows
   const [openWindows, setOpenWindows] = useState([]);
-  const [showTerminal, setShowTerminal] = useState(true);
+  const [showTerminal, setShowTerminal] = useState(false);
   const [terminalMinimized, setTerminalMinimized] = useState(false);
   const [minimizedWindows, setMinimizedWindows] = useState({});
   
@@ -57,7 +57,7 @@ const Desktop = () => {
   });
   
   // Window focus management (z-index ordering)
-  const [focusOrder, setFocusOrder] = useState(['terminal']);
+  const [focusOrder, setFocusOrder] = useState([]);
   
   // References for drag and resize handling
   const dragRef = useRef(null);
@@ -273,6 +273,34 @@ const Desktop = () => {
     }
   };
 
+  // Calculate window position and size
+  const centerWindow = () => {
+    // Base size is 80% of screen
+    const baseWidth = window.innerWidth * 0.8;
+    const baseHeight = window.innerHeight * 0.8;
+    
+    // Calculate size reduction factor based on number of open windows
+    // Each new window will be 5% smaller than the previous one
+    const sizeReductionFactor = Math.max(0.7, 1 - (openWindows.length * 0.05));
+    
+    // Apply size reduction
+    const windowWidth = baseWidth * sizeReductionFactor;
+    const windowHeight = baseHeight * sizeReductionFactor;
+    
+    // Calculate center position
+    const centerX = (window.innerWidth - windowWidth) / 2;
+    const centerY = (window.innerHeight - windowHeight) / 2;
+    
+    // Add a slight offset based on the number of open windows
+    const offsetX = openWindows.length * 20;
+    const offsetY = openWindows.length * 20;
+    
+    return {
+      position: { x: centerX + offsetX, y: centerY + offsetY },
+      size: { width: windowWidth, height: windowHeight }
+    };
+  };
+
   // Handle icon click
   const handleIconClick = (content) => {
     // If terminal icon
@@ -284,6 +312,17 @@ const Desktop = () => {
         // Show terminal
         setShowTerminal(true);
         setTerminalMinimized(false);
+        
+        // Center the terminal window
+        const { position, size } = centerWindow();
+        setWindowPositions(prev => ({
+          ...prev,
+          terminal: position
+        }));
+        setWindowSizes(prev => ({
+          ...prev,
+          terminal: size
+        }));
       }
       
       // Bring terminal to front
@@ -307,17 +346,17 @@ const Desktop = () => {
         // Open new window
         setOpenWindows(prev => [...prev, content]);
         
-        // Position window with offset from previous windows
-        const offset = openWindows.length * 30 + 50;
+        // Center the window
+        const { position, size } = centerWindow();
         setWindowPositions(prev => ({
           ...prev,
-          [content]: { x: offset, y: offset }
+          [content]: position
         }));
         
-        // Set default window size
+        // Set window size to 80% of screen
         setWindowSizes(prev => ({
           ...prev,
-          [content]: { width: 800, height: 600 }
+          [content]: size
         }));
         
         // Add to focus order
@@ -330,14 +369,25 @@ const Desktop = () => {
   const handleCommandExecute = (command) => {
     // Check if window is already open
     if (!openWindows.includes(command)) {
+      // Add window to open windows list
       setOpenWindows(prev => [...prev, command]);
+      
       // Add to focus order (bring to front)
       setFocusOrder(prev => [...prev, command]);
-      // Set initial position with slight offset based on number of windows
-      const offset = openWindows.length * 20;
+      
+      // Get window position and size with automatic scaling
+      const { position, size } = centerWindow();
+      
+      // Set position and size
       setWindowPositions(prev => ({
         ...prev,
-        [command]: { x: 50 + offset, y: 50 + offset }
+        [command]: position
+      }));
+      
+      // Set size
+      setWindowSizes(prev => ({
+        ...prev,
+        [command]: size
       }));
     } else {
       // If already open, just bring to front
@@ -362,8 +412,17 @@ const Desktop = () => {
   const handleMinimizeWindow = (content) => {
     setMinimizedWindows(prev => ({
       ...prev,
-      [content]: !prev[content]
+      [content]: true
     }));
+  };
+
+  // Handle restore window from minimized state
+  const handleRestoreWindow = (content) => {
+    setMinimizedWindows(prev => ({
+      ...prev,
+      [content]: false
+    }));
+    bringToFront(content);
   };
 
   // Desktop icons configuration
@@ -395,41 +454,86 @@ const Desktop = () => {
       icon: <EnvelopeIcon />, 
       position: { x: 20, y: 320 },
       bgColor: '#e74c3c' // Red
-    },
-    { 
-      id: 'terminal', 
-      label: 'Terminal', 
-      icon: <TerminalIcon />, 
-      position: { x: 20, y: 420 },
-      bgColor: '#f39c12' // Orange
     }
   ];
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-kali-wallpaper">
       {/* Top Bar */}
-      <TopBar />
-      {/* Desktop Icons */}
-      {desktopIcons.map((icon) => (
-        <DesktopIcon
-          key={icon.id}
-          icon={icon.icon}
-          label={icon.label}
-          position={icon.position}
-          bgColor={icon.bgColor}
-          onClick={() => handleIconClick(icon.id)}
-        />
-      ))}
+      <TopBar onTerminalClick={() => handleIconClick('terminal')} />
+      {/* Desktop Icons - positioned with absolute positioning instead of grid */}
+      {desktopIcons.map((icon, index) => {
+        // Calculate position with offset to avoid the top bar
+        const position = {
+          x: icon.position.x,
+          y: icon.position.y + 50 // Add extra space to avoid the top bar
+        };
+        
+        return (
+          <DesktopIcon 
+            key={icon.id}
+            icon={icon.icon}
+            label={icon.label}
+            position={position}
+            bgColor={icon.bgColor}
+            onClick={() => handleIconClick(icon.id)}
+          />
+        );
+      })}
+      
+      {/* Minimized Windows Stack */}
+      <div className="fixed bottom-0 right-0 flex flex-col-reverse items-end space-y-reverse space-y-1 p-2 z-50">
+        {/* Minimized Terminal */}
+        {showTerminal && terminalMinimized && (
+          <div 
+            className="w-64 h-10 bg-[#1e1e2e] border border-[#30363d] rounded-t-md shadow-lg flex items-center cursor-pointer hover:bg-[#2d2d3a] transition-colors"
+            onClick={() => {
+              setTerminalMinimized(false);
+              bringToFront('terminal');
+            }}
+          >
+            <div className="flex space-x-2 mx-2">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            </div>
+            <div className="flex-1 text-center text-sm font-mono text-[#00ff00]">
+              Terminal
+            </div>
+          </div>
+        )}
+        
+        {/* Minimized Content Windows */}
+        {Object.entries(minimizedWindows)
+          .filter(([content, isMinimized]) => isMinimized && openWindows.includes(content))
+          .map(([content]) => (
+            <div 
+              key={`minimized-${content}`}
+              className="w-64 h-10 bg-[#1e1e2e] border border-[#30363d] rounded-t-md shadow-lg flex items-center cursor-pointer hover:bg-[#2d2d3a] transition-colors"
+              onClick={() => handleRestoreWindow(content)}
+            >
+              <div className="flex space-x-2 mx-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              </div>
+              <div className="flex-1 text-center text-sm font-mono text-[#00ff00]">
+                {content.charAt(0).toUpperCase() + content.slice(1)}
+              </div>
+            </div>
+          ))
+        }
+      </div>
 
       {/* Terminal Window */}
-      {showTerminal && (
+      {showTerminal && !terminalMinimized && (
         <div 
-          className={`absolute ${dragRef.current === 'terminal' ? 'cursor-grabbing' : 'cursor-grab'} ${terminalMinimized ? 'w-64 h-10 bottom-0 left-0' : 'rounded-md overflow-hidden shadow-2xl'}`}
+          className="absolute rounded-md overflow-hidden shadow-2xl"
           style={{
-            top: terminalMinimized ? 'auto' : `${windowPositions.terminal?.y || 100}px`,
-            left: terminalMinimized ? '0' : `${windowPositions.terminal?.x || 100}px`,
-            width: terminalMinimized ? '16rem' : `${windowSizes.terminal?.width || 600}px`,
-            height: terminalMinimized ? '2.5rem' : `${windowSizes.terminal?.height || 400}px`,
+            top: `${windowPositions.terminal?.y || (window.innerHeight * 0.1)}px`,
+            left: `${windowPositions.terminal?.x || (window.innerWidth * 0.1)}px`,
+            width: `${windowSizes.terminal?.width || (window.innerWidth * 0.8)}px`,
+            height: `${windowSizes.terminal?.height || (window.innerHeight * 0.8)}px`,
             zIndex: focusOrder.indexOf('terminal') + 100
           }}
           onClick={() => bringToFront('terminal')}
@@ -527,19 +631,18 @@ const Desktop = () => {
         // Calculate z-index based on focus order
         const zIndex = focusOrder.indexOf(windowContent) + 100;
         
+        // Skip rendering here if minimized - will be rendered in the minimized stack
+        if (isMinimized) return null;
+        
         return (
           <div 
             key={windowContent}
-            className={`absolute ${dragRef.current === windowContent ? 'cursor-grabbing' : 'cursor-grab'} ${
-              isMinimized 
-                ? 'w-64 h-10 bottom-0 right-0' 
-                : 'rounded-md overflow-hidden shadow-2xl'
-            }`}
+            className="absolute rounded-md overflow-hidden shadow-2xl"
             style={{
-              top: isMinimized ? 'auto' : `${position.y}px`,
-              left: isMinimized ? 'auto' : `${position.x}px`,
-              width: isMinimized ? '16rem' : `${windowSizes[windowContent]?.width || 800}px`,
-              height: isMinimized ? '2.5rem' : `${windowSizes[windowContent]?.height || 600}px`,
+              top: `${position.y}px`,
+              left: `${position.x}px`,
+              width: `${windowSizes[windowContent]?.width || (window.innerWidth * 0.8)}px`,
+              height: `${windowSizes[windowContent]?.height || (window.innerHeight * 0.8)}px`,
               zIndex: zIndex
             }}
             onClick={() => bringToFront(windowContent)}

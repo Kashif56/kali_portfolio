@@ -8,15 +8,7 @@ const ContentRenderer = ({ activeContent }) => {
 
   const renderProjects = () => (
     <div className="space-y-8">
-      <div className="flex items-center bg-[#0d1117] border-b border-[#30363d] py-2 px-4 rounded-t-md">
-        <div className="flex space-x-2 mr-4">
-          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-        </div>
-        <h2 className="text-xl font-mono font-bold text-[#00ff00]">Projects</h2>
-      </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {projects.map((project) => (
           <div key={project.id} className="bg-[#1e1e2e] p-6 rounded-md border border-[#30363d] hover:border-[#00ff00] transition-colors shadow-lg">
@@ -48,14 +40,7 @@ const ContentRenderer = ({ activeContent }) => {
 
   const renderExperience = () => (
     <div className="space-y-8">
-      <div className="flex items-center bg-[#0d1117] border-b border-[#30363d] py-2 px-4 rounded-t-md">
-        <div className="flex space-x-2 mr-4">
-          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-        </div>
-        <h2 className="text-xl font-mono font-bold text-[#00ff00]">Professional Experience</h2>
-      </div>
+
       
       <div className="space-y-6">
         {experiences.map((exp) => (
@@ -84,14 +69,7 @@ const ContentRenderer = ({ activeContent }) => {
 
   const renderAbout = () => (
     <div className="space-y-8">
-      <div className="flex items-center bg-[#0d1117] border-b border-[#30363d] py-2 px-4 rounded-t-md">
-        <div className="flex space-x-2 mr-4">
-          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-        </div>
-        <h2 className="text-xl font-mono font-bold text-[#00ff00]">About Me</h2>
-      </div>
+
       
       <div className="bg-[#1e1e2e] p-8 rounded-md border border-[#30363d] shadow-lg">
         <div className="flex flex-col md:flex-row gap-8">
@@ -148,14 +126,7 @@ const ContentRenderer = ({ activeContent }) => {
 
   const renderContact = () => (
     <div className="space-y-8">
-      <div className="flex items-center bg-[#0d1117] border-b border-[#30363d] py-2 px-4 rounded-t-md">
-        <div className="flex space-x-2 mr-4">
-          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-        </div>
-        <h2 className="text-xl font-mono font-bold text-[#00ff00]">Contact</h2>
-      </div>
+
       
       <div className="bg-[#1e1e2e] p-8 rounded-md border border-[#30363d] shadow-lg">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
