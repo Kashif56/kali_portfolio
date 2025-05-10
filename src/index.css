@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --kali-blue: #0066cc;
+  --kali-dark: #1a1a1a;
+  --terminal-green: #00ff00;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+body {
+  background-color: var(--kali-dark);
+  color: white;
+  overflow: hidden;
+}
+
+/* Kali Linux wallpaper background */
+.bg-kali-wallpaper {
+  background-image: url('https://www.kali.org/images/wallpapers-2020/kali-geometric-16x9.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Terminal cursor blinking animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Boot progress animation */
+@keyframes boot-progress {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+
+.animate-boot-progress {
+  animation: boot-progress 2s ease-in-out;
+  width: 100%;
+}
+
+/* Make desktop icons draggable */
+.draggable {
+  cursor: grab;
+}
+
+.dragging {
+  cursor: grabbing;
+  z-index: 1000;
+}
+
+/* Terminal scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Terminal flash effect for command feedback */
+@keyframes terminal-flash {
+  0% { background-color: black; }
+  50% { background-color: #1a3a1a; }
+  100% { background-color: black; }
+}
+
+.terminal-flash {
+  animation: terminal-flash 0.2s ease-out;
+}
