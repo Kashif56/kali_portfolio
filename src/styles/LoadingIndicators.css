@@ -1,0 +1,111 @@
+/* Terminal-style progress indicator */
+.terminal-progress-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: #111;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.terminal-progress-char {
+  color: transparent;
+  transition: color 0.2s ease;
+}
+
+.terminal-progress-char.active {
+  color: #00ff41; /* Kali green */
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.7);
+}
+
+/* Animated ellipsis for loading states */
+.loading-ellipsis {
+  display: inline-block;
+  position: relative;
+}
+
+.loading-ellipsis .dot-one,
+.loading-ellipsis .dot-two,
+.loading-ellipsis .dot-three {
+  opacity: 0;
+  animation-name: dot-animation;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: forwards;
+}
+
+.loading-ellipsis .dot-one {
+  animation-delay: 0.2s;
+}
+
+.loading-ellipsis .dot-two {
+  animation-delay: 0.4s;
+}
+
+.loading-ellipsis .dot-three {
+  animation-delay: 0.6s;
+}
+
+@keyframes dot-animation {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Additional loading indicators for use throughout the app */
+.terminal-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid rgba(0, 255, 65, 0.3);
+  border-radius: 50%;
+  border-top-color: #00ff41;
+  animation: terminal-spinner-animation 1s linear infinite;
+}
+
+@keyframes terminal-spinner-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animated progress bar for file operations */
+.file-progress-bar {
+  height: 4px;
+  width: 100%;
+  background-color: #111;
+  position: relative;
+  overflow: hidden;
+}
+
+.file-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 30%;
+  background-color: #00ff41;
+  animation: file-progress 1.5s infinite ease-in-out;
+}
+
+@keyframes file-progress {
+  0% {
+    left: -30%;
+  }
+  100% {
+    left: 100%;
+  }
+}

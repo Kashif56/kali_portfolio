@@ -4,6 +4,8 @@ import Terminal from './Terminal';
 import ContentRenderer from './ContentRenderer';
 import TopBar from './TopBar';
 import ContextMenu from './ContextMenu';
+import Dock from './Dock';
+import { FaWindowMinimize, FaWindowMaximize, FaWindowRestore, FaTimes } from 'react-icons/fa';
 
 // Custom icon components with colors
 const FolderIcon = () => (
@@ -71,22 +73,12 @@ const Desktop = () => {
   // Window focus management (z-index ordering)
   const [focusOrder, setFocusOrder] = useState([]);
   
-  // Window color mapping for unique top bar colors
-  const [windowColors, setWindowColors] = useState({});
+  // Track active window for styling purposes
+  const [activeWindow, setActiveWindow] = useState(null);
   
-  // Predefined colors for window top bars (darker shades)
-  const topBarColors = [
-    '#1a4971', // Dark Blue
-    '#5e3370', // Dark Purple
-    '#1a6840', // Dark Green
-    '#922b21', // Dark Red
-    '#9a5f0b', // Dark Orange
-    '#117864', // Dark Teal
-    '#873600', // Dark Pumpkin
-    '#512e5f', // Dark Wisteria
-    '#0e6251', // Dark Green Sea
-    '#7b241c', // Dark Pomegranate
-  ];
+  // Track window snapping state
+  const [snappedWindows, setSnappedWindows] = useState({});
+
   
   // References for drag and resize handling
   const dragRef = useRef(null);
@@ -99,25 +91,63 @@ const Desktop = () => {
   
   // Mouse movement handler for window dragging and resizing
   const handleMouseMove = (e) => {
-    // Update mouse position
+    // Update mouse position for hover effects
     setMousePosition({ x: e.clientX, y: e.clientY });
     
     // Handle window dragging
     if (dragRef.current) {
-      // Calculate new position
-      const newPosition = {
-        x: e.clientX - dragOffsetRef.current.x,
-        y: e.clientY - dragOffsetRef.current.y
-      };
+      const deltaX = e.clientX - dragOffsetRef.current.x;
+      const deltaY = e.clientY - dragOffsetRef.current.y;
       
-      // Update position
+      // Check for window snapping during drag
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const snapThreshold = 20; // pixels from edge to trigger snap
+      let snapPosition = null;
+      
+      // Detect proximity to screen edges for snapping
+      if (e.clientX < snapThreshold) {
+        // Left edge snap
+        if (e.clientY < snapThreshold) {
+          snapPosition = 'top-left';
+        } else if (e.clientY > viewportHeight - snapThreshold) {
+          snapPosition = 'bottom-left';
+        } else {
+          snapPosition = 'left';
+        }
+      } else if (e.clientX > viewportWidth - snapThreshold) {
+        // Right edge snap
+        if (e.clientY < snapThreshold) {
+          snapPosition = 'top-right';
+        } else if (e.clientY > viewportHeight - snapThreshold) {
+          snapPosition = 'bottom-right';
+        } else {
+          snapPosition = 'right';
+        }
+      } else if (e.clientY < snapThreshold) {
+        // Top edge snap
+        snapPosition = 'top';
+      } else if (e.clientY > viewportHeight - snapThreshold) {
+        // Bottom edge snap
+        snapPosition = 'bottom';
+      }
+      
+      if (snapPosition) {
+        // Visual indicator for snap zones (could be implemented with a highlight effect)
+        // For now, we'll just apply the snap when mouse is released
+        // We'll store the snap position for use in mouseUp handler
+        dragRef.current = { windowId: dragRef.current, snapPosition };
+      }
+      
+      // Update window position
       setWindowPositions(prev => ({
         ...prev,
-        [dragRef.current]: newPosition
+        [dragRef.current.windowId || dragRef.current]: { 
+          x: deltaX, 
+          y: deltaY 
+        }
       }));
-    }
-    
-    // Handle window resizing
+    }// Handle window resizing
     if (resizeRef.current && resizeTypeRef.current) {
       const windowId = resizeRef.current;
       const resizeType = resizeTypeRef.current;
@@ -200,30 +230,41 @@ const Desktop = () => {
   
   // Handle mouse up event
   const handleMouseUp = () => {
-    // Clear drag and resize references
+    // Apply window snap if applicable
+    if (dragRef.current && dragRef.current.snapPosition) {
+      handleWindowSnap(dragRef.current.windowId, dragRef.current.snapPosition);
+    }
+    
+    // Clear drag reference
     dragRef.current = null;
+    
+    // Clear resize reference
     resizeRef.current = null;
-    resizeTypeRef.current = null;
+    
+    // Reset cursor style
     document.body.style.cursor = 'default';
   };
   
   // Set up event listeners for dragging and resizing
   useEffect(() => {
-    
     if (dragRef.current || resizeRef.current) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.cursor = 'default';
+      };
     }
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'default';
-    };
-  }, [dragRef.current, resizeRef.current, windowPositions]);
+  }, [dragRef.current, resizeRef.current]);
   
   // Handle window focus
   const bringToFront = (windowId) => {
+    // Set as active window for styling
+    setActiveWindow(windowId);
+    
+    // Update focus order for z-index
     setFocusOrder(prev => {
       // Remove the window from the current order
       const newOrder = prev.filter(id => id !== windowId);
@@ -393,12 +434,8 @@ const Desktop = () => {
           [content]: size
         }));
         
-        // Assign a unique color to the window
-        const colorIndex = openWindows.length % topBarColors.length;
-        setWindowColors(prev => ({
-          ...prev,
-          [content]: topBarColors[colorIndex]
-        }));
+        // Set as active window
+        setActiveWindow(content);
         
         // Add to focus order
         setFocusOrder(prev => [...prev, content]);
@@ -431,12 +468,8 @@ const Desktop = () => {
         [command]: size
       }));
       
-      // Assign a unique color to the window
-      const colorIndex = openWindows.length % topBarColors.length;
-      setWindowColors(prev => ({
-        ...prev,
-        [command]: topBarColors[colorIndex]
-      }));
+      // Set as active window
+      setActiveWindow(command);
     } else {
       // If already open, just bring to front
       bringToFront(command);
@@ -448,37 +481,162 @@ const Desktop = () => {
     }));
   };
   
-  // Handle close window
+  // Handle close window with animation
   const handleCloseWindow = (content) => {
-    setOpenWindows(prev => prev.filter(window => window !== content));
+    // Get the window element
+    const windowElement = document.querySelector(`[data-window-id="${content}"]`);
     
-    // Remove from focus order
-    setFocusOrder(prev => prev.filter(id => id !== content));
+    if (windowElement) {
+      // Add close animation class
+      windowElement.classList.add('window-close');
+      
+      // Wait for animation to complete before removing from DOM
+      setTimeout(() => {
+        setOpenWindows(prev => prev.filter(window => window !== content));
+        // Remove from focus order
+        setFocusOrder(prev => prev.filter(id => id !== content));
+      }, 200); // Match animation duration
+    } else {
+      // Fallback if element not found
+      setOpenWindows(prev => prev.filter(window => window !== content));
+      // Remove from focus order
+      setFocusOrder(prev => prev.filter(id => id !== content));
+    }
   };
   
-  // Handle minimize window
+  // Handle minimize window with animation
   const handleMinimizeWindow = (content) => {
-    setMinimizedWindows(prev => ({
-      ...prev,
-      [content]: true
-    }));
+    // Get the window element
+    const windowElement = document.querySelector(`[data-window-id="${content}"]`);
+    
+    if (windowElement) {
+      // Add minimize animation class
+      windowElement.classList.add('window-minimize');
+      
+      // Wait for animation to complete before actually minimizing
+      setTimeout(() => {
+        setMinimizedWindows(prev => ({
+          ...prev,
+          [content]: true
+        }));
+      }, 200); // Match animation duration
+    } else {
+      // Fallback if element not found
+      setMinimizedWindows(prev => ({
+        ...prev,
+        [content]: true
+      }));
+    }
   };
 
-  // Handle restore window from minimized state
+  // Handle restore window from minimized state with animation
   const handleRestoreWindow = (content) => {
+    // First update the state to show the window
     setMinimizedWindows(prev => ({
       ...prev,
       [content]: false
     }));
+    
+    // Bring window to front
     bringToFront(content);
+    
+    // Add restore animation class after a short delay to ensure the element exists
+    setTimeout(() => {
+      const windowElement = document.querySelector(`[data-window-id="${content}"]`);
+      if (windowElement) {
+        windowElement.classList.add('window-restore');
+        
+        // Remove the animation class after it completes
+        setTimeout(() => {
+          windowElement.classList.remove('window-restore');
+        }, 200);
+      }
+    }, 10);
   };
   
   // Handle maximize/restore window
   const handleMaximizeWindow = (windowId) => {
+    // Clear any snapped state when maximizing/restoring
+    setSnappedWindows(prev => ({
+      ...prev,
+      [windowId]: null
+    }));
+    
     setMaximizedWindows(prev => ({
       ...prev,
       [windowId]: !prev[windowId]
     }));
+  };
+  
+  // Handle window snapping
+  const handleWindowSnap = (windowId, position) => {
+    // Calculate window dimensions based on snap position
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    let newPosition = { x: 0, y: 0 };
+    let newSize = { width: 0, height: 0 };
+    
+    switch(position) {
+      case 'left':
+        newPosition = { x: 0, y: 0 };
+        newSize = { width: viewportWidth / 2, height: viewportHeight };
+        break;
+      case 'right':
+        newPosition = { x: viewportWidth / 2, y: 0 };
+        newSize = { width: viewportWidth / 2, height: viewportHeight };
+        break;
+      case 'top':
+        newPosition = { x: 0, y: 0 };
+        newSize = { width: viewportWidth, height: viewportHeight / 2 };
+        break;
+      case 'bottom':
+        newPosition = { x: 0, y: viewportHeight / 2 };
+        newSize = { width: viewportWidth, height: viewportHeight / 2 };
+        break;
+      case 'top-left':
+        newPosition = { x: 0, y: 0 };
+        newSize = { width: viewportWidth / 2, height: viewportHeight / 2 };
+        break;
+      case 'top-right':
+        newPosition = { x: viewportWidth / 2, y: 0 };
+        newSize = { width: viewportWidth / 2, height: viewportHeight / 2 };
+        break;
+      case 'bottom-left':
+        newPosition = { x: 0, y: viewportHeight / 2 };
+        newSize = { width: viewportWidth / 2, height: viewportHeight / 2 };
+        break;
+      case 'bottom-right':
+        newPosition = { x: viewportWidth / 2, y: viewportHeight / 2 };
+        newSize = { width: viewportWidth / 2, height: viewportHeight / 2 };
+        break;
+      default:
+        return;
+    }
+    
+    // Set window position and size
+    setWindowPositions(prev => ({
+      ...prev,
+      [windowId]: newPosition
+    }));
+    
+    setWindowSizes(prev => ({
+      ...prev,
+      [windowId]: newSize
+    }));
+    
+    // Update snapped state
+    setSnappedWindows(prev => ({
+      ...prev,
+      [windowId]: position
+    }));
+    
+    // Clear maximized state
+    setMaximizedWindows(prev => ({
+      ...prev,
+      [windowId]: false
+    }));
+    
+    // Bring window to front when snapped
     bringToFront(windowId);
   };
 
@@ -576,46 +734,72 @@ const Desktop = () => {
       return [
         {
           label: 'Open Terminal',
-          icon: '🖥️',
+          iconName: 'terminal',
+          shortcut: 'Ctrl+Alt+T',
           onClick: () => handleIconClick('terminal')
+        },
+        {
+          label: 'New Window',
+          iconName: 'clone',
+          onClick: () => handleIconClick('projects')
         },
         {
           separator: true
         },
         {
           label: 'Reset All Icons',
-          icon: '🔄',
+          iconName: 'reset',
           onClick: resetIconPositions
-        },
-        {
-          label: 'Create New Folder',
-          icon: '📁',
-          onClick: () => console.log('Create New Folder clicked'),
-          disabled: true // Not implemented yet
         },
         {
           separator: true
         },
         {
+          label: 'Create New Folder',
+          iconName: 'folder',
+          onClick: () => console.log('Create New Folder clicked')
+        },
+        {
           label: 'Display Settings',
-          icon: '🖌️',
-          onClick: () => console.log('Display Settings clicked'),
-          disabled: true // Not implemented yet
+          iconName: 'settings',
+          onClick: () => console.log('Display Settings clicked')
+        },
+        {
+          separator: true
+        },
+        {
+          label: 'Open System Tools',
+          iconName: 'security',
+          onClick: () => console.log('System Tools clicked')
+        },
+        {
+          label: 'Network Settings',
+          iconName: 'desktop',
+          onClick: () => console.log('Network Settings clicked')
         }
       ];
     } else if (contextMenuTarget.type === 'Window') {
       const windowId = contextMenuTarget.id;
       const isMinimized = minimizedWindows[windowId];
+      const isMaximized = maximizedWindows[windowId];
       
       return [
         {
           label: isMinimized ? 'Restore' : 'Minimize',
-          icon: isMinimized ? '🔼' : '🔽',
+          iconName: isMinimized ? 'restore' : 'minimize',
+          shortcut: 'Alt+F9',
           onClick: () => isMinimized ? handleRestoreWindow(windowId) : handleMinimizeWindow(windowId)
         },
         {
+          label: isMaximized ? 'Restore' : 'Maximize',
+          iconName: isMaximized ? 'restore' : 'maximize',
+          shortcut: 'Alt+F10',
+          onClick: () => handleMaximizeWindow(windowId)
+        },
+        {
           label: 'Close',
-          icon: '❌',
+          iconName: 'close',
+          shortcut: 'Alt+F4',
           onClick: () => handleCloseWindow(windowId)
         },
         {
@@ -623,8 +807,31 @@ const Desktop = () => {
         },
         {
           label: 'Center Window',
-          icon: '📍',
+          iconName: 'center',
           onClick: () => centerWindow(windowId)
+        },
+        {
+          separator: true
+        },
+        {
+          label: 'Snap Left',
+          iconName: 'expand',
+          onClick: () => handleWindowSnap(windowId, 'left')
+        },
+        {
+          label: 'Snap Right',
+          iconName: 'expand',
+          onClick: () => handleWindowSnap(windowId, 'right')
+        },
+        {
+          label: 'Snap Top',
+          iconName: 'expand',
+          onClick: () => handleWindowSnap(windowId, 'top')
+        },
+        {
+          label: 'Snap Bottom',
+          iconName: 'expand',
+          onClick: () => handleWindowSnap(windowId, 'bottom')
         }
       ];
     }
@@ -770,10 +977,21 @@ const Desktop = () => {
         />
       )}
       
+      {/* Kali-style Dock/Taskbar */}
+      <Dock 
+        openWindows={openWindows}
+        showTerminal={showTerminal}
+        activeWindow={activeWindow}
+        onItemClick={handleIconClick}
+        onTerminalClick={() => handleIconClick('terminal')}
+        minimizedWindows={minimizedWindows}
+      />
+      
       {/* Terminal Window */}
       {showTerminal && !terminalMinimized && (
         <div 
-          className="absolute rounded-md overflow-hidden shadow-2xl"
+          className="absolute rounded-md overflow-hidden shadow-2xl window-open"
+          data-window-id="terminal"
           style={{
             top: maximizedWindows['terminal'] ? '0' : `${windowPositions.terminal?.y || (window.innerHeight * 0.1)}px`,
             left: maximizedWindows['terminal'] ? '0' : `${windowPositions.terminal?.x || (window.innerWidth * 0.1)}px`,
@@ -787,8 +1005,7 @@ const Desktop = () => {
           <div className="w-full h-full flex flex-col bg-[#1e1e2e] rounded-md overflow-hidden shadow-2xl border border-[#30363d] relative">
             {/* Terminal header with controls */}
             <div 
-              className="flex items-center h-8 border-b border-[#30363d] px-3 cursor-move"
-              style={{ backgroundColor: '#1a4971' }} /* Using dark blue for terminal */
+              className={`flex items-center h-8 px-3 cursor-move kali-terminal-header ${activeWindow === 'terminal' ? 'kali-window-header-active' : ''}`}
               onMouseDown={(e) => handleStartDrag(e, 'terminal')}
             >
               {/* Window title - left aligned */}
@@ -800,50 +1017,48 @@ const Desktop = () => {
               <div className="flex space-x-4">
                 {/* Minimize button with icon */}
                 <div 
-                  className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
+                  className="cursor-pointer hover:bg-[#444] rounded flex items-center justify-center group relative p-1 mx-0.5"
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent dragging when clicking button
                     setTerminalMinimized(!terminalMinimized);
                   }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
-                  </svg>
-                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Minimize Terminal</span>
+                  <FaWindowMinimize className="h-3 w-3 text-gray-300" />
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Minimize Terminal (Alt+F9)</span>
                 </div>
                 
                 {/* Maximize button with icon */}
                 <div 
-                  className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
+                  className="cursor-pointer hover:bg-[#444] rounded flex items-center justify-center group relative p-1 mx-0.5"
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent dragging when clicking button
                     handleMaximizeWindow('terminal');
                   }}
+                  onDoubleClick={(e) => {
+                    e.stopPropagation(); // Prevent other handlers
+                    handleMaximizeWindow('terminal');
+                  }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                    {maximizedWindows['terminal'] ? (
-                      <path fillRule="evenodd" d="M5 4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V5a1 1 0 00-1-1H5zm0 1h10v10H5V5z" clipRule="evenodd" />
-                    ) : (
-                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm1 0v12h12V4H4z" clipRule="evenodd" />
-                    )}
-                  </svg>
+                  {maximizedWindows['terminal'] ? (
+                    <FaWindowRestore className="h-3 w-3 text-gray-300" />
+                  ) : (
+                    <FaWindowMaximize className="h-3 w-3 text-gray-300" />
+                  )}
                   <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">
-                    {maximizedWindows['terminal'] ? 'Restore Terminal' : 'Maximize Terminal'}
+                    {maximizedWindows['terminal'] ? 'Restore Terminal (Alt+F10)' : 'Maximize Terminal (Alt+F10)'}
                   </span>
                 </div>
                 
                 {/* Close button with icon */}
                 <div 
-                  className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
+                  className="cursor-pointer hover:bg-[#f44] rounded flex items-center justify-center group relative p-1 mx-0.5"
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent dragging when clicking button
                     setShowTerminal(false);
                   }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Close Terminal</span>
+                  <FaTimes className="h-3 w-3 text-gray-300" />
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Close Terminal (Alt+F4)</span>
                 </div>
               </div>
             </div>
@@ -913,7 +1128,8 @@ const Desktop = () => {
         return (
           <div 
             key={windowContent}
-            className="absolute rounded-md overflow-hidden shadow-2xl"
+            className="absolute rounded-md overflow-hidden shadow-2xl window-open"
+            data-window-id={windowContent}
             style={{
               top: maximizedWindows[windowContent] ? '0' : `${position.y}px`,
               left: maximizedWindows[windowContent] ? '0' : `${position.x}px`,
@@ -928,8 +1144,7 @@ const Desktop = () => {
               {/* Content header with controls */}
               {/* Window title bar */}
               <div 
-                className="flex items-center h-8 border-b border-[#30363d] px-3 cursor-move" 
-                style={{ backgroundColor: windowColors[windowContent] || '#1e1e2e' }}
+                className={`flex items-center h-8 px-3 cursor-move kali-window-header ${activeWindow === windowContent ? 'kali-window-header-active' : ''}`}
                 onMouseDown={(e) => handleStartDrag(e, windowContent)}
               >
                 {/* Window title - left aligned */}
@@ -944,50 +1159,48 @@ const Desktop = () => {
                 <div className="flex space-x-4">
                   {/* Minimize button with icon */}
                   <div 
-                    className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
+                    className="cursor-pointer hover:bg-[#444] rounded flex items-center justify-center group relative p-1 mx-0.5"
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent dragging when clicking button
                       handleMinimizeWindow(windowContent);
                     }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
-                    </svg>
-                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Minimize Window</span>
+                    <FaWindowMinimize className="h-3 w-3 text-gray-300" />
+                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Minimize Window (Alt+F9)</span>
                   </div>
                   
-                  {/* Maximize button with icon */}
+                  {/* Maximize/restore button with icon */}
                   <div 
-                    className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
+                    className="cursor-pointer hover:bg-[#444] rounded flex items-center justify-center group relative p-1 mx-0.5"
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent dragging when clicking button
                       handleMaximizeWindow(windowContent);
                     }}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation(); // Prevent other handlers
+                      handleMaximizeWindow(windowContent);
+                    }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      {maximizedWindows[windowContent] ? (
-                        <path fillRule="evenodd" d="M5 4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V5a1 1 0 00-1-1H5zm0 1h10v10H5V5z" clipRule="evenodd" />
-                      ) : (
-                        <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm1 0v12h12V4H4z" clipRule="evenodd" />
-                      )}
-                    </svg>
+                    {maximizedWindows[windowContent] ? (
+                      <FaWindowRestore className="h-3 w-3 text-gray-300" />
+                    ) : (
+                      <FaWindowMaximize className="h-3 w-3 text-gray-300" />
+                    )}
                     <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">
-                      {maximizedWindows[windowContent] ? 'Restore Window' : 'Maximize Window'}
+                      {maximizedWindows[windowContent] ? 'Restore Window (Alt+F10)' : 'Maximize Window (Alt+F10)'}
                     </span>
                   </div>
                   
                   {/* Close button with icon */}
                   <div 
-                    className="cursor-pointer hover:text-gray-300 flex items-center justify-center group relative"
+                    className="cursor-pointer hover:bg-[#f44] rounded flex items-center justify-center group relative p-1 mx-0.5"
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent dragging when clicking button
                       handleCloseWindow(windowContent);
                     }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Close Window</span>
+                    <FaTimes className="h-3 w-3 text-gray-300" />
+                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">Close Window (Alt+F4)</span>
                   </div>
                 </div>
               </div>

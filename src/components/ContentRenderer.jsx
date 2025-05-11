@@ -44,7 +44,7 @@ const ContentRenderer = ({ activeContent }) => {
         {projects.map((project) => (
           <div key={project.id} className="bg-[#1e1e2e] p-6 rounded-md border border-[#30363d] hover:border-[#00ff00] transition-colors shadow-lg">
             <h3 className="text-lg font-mono font-semibold text-[#00ff00] mb-3">{project.title}</h3>
-            <p className="text-gray-300 mb-4 font-mono text-sm leading-relaxed">{project.description}</p>
+            <p className="text-gray-300 mb-4 font-sans text-sm leading-relaxed">{project.description}</p>
             <div className="mb-4">
               <h4 className="text-sm font-mono text-gray-400 mb-2">Technologies:</h4>
               <div className="flex flex-wrap gap-2">
@@ -117,7 +117,7 @@ const ContentRenderer = ({ activeContent }) => {
             <div className="mt-4 p-3 bg-[#0d1117] rounded-md border border-[#30363d]">
               <h3 className="text-center text-lg font-mono font-semibold text-[#00ff00]">{personalInfo.name}</h3>
               <p className="text-center text-[#00bfff] font-mono">{personalInfo.title}</p>
-              <p className="text-center text-gray-400 font-mono mt-2">{personalInfo.location}</p>
+              <p className="text-center text-gray-400 font-sans mt-2">{personalInfo.location}</p>
             </div>
             
             {/* Highlights Section */}
@@ -127,7 +127,7 @@ const ContentRenderer = ({ activeContent }) => {
                 {personalInfo.highlights.map((highlight, index) => (
                   <div key={index} className="flex items-center">
                     <span className="text-[#00ff00] mr-2">✓</span>
-                    <span className="text-sm font-mono text-gray-300">{highlight}</span>
+                    <span className="text-sm font-sans text-gray-300">{highlight}</span>
                   </div>
                 ))}
               </div>

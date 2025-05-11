@@ -1,19 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fira+Code:wght@400;500;700&family=Overpass:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
-
 
 :root {
   --kali-blue: #0066cc;
-  --kali-dark: #1a1a1a;
+  --kali-dark: #121212; /* Darker background */
   --terminal-green: #00ff41;
-  --kali-green: #00ff41;
-  --kali-dragon-blue: #0066cc;
-  --kali-text-gray: #b2b2b2;
+  --kali-accent: #367bf0; /* Kali's accent blue */
+  --kali-dark-blue: #1a1a2e; /* For window headers */
+  --kali-text-gray: #d3d3d3; /* Lighter gray for better readability */
 }
 
 * {
   box-sizing: border-box;
-  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Font family definitions */
+:root {
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Hack', monospace;
+  --font-sans: 'Overpass', 'Segoe UI', 'Helvetica Neue', sans-serif;
+}
+
+/* Default to monospace for the hacker aesthetic */
+body, button, input, textarea {
+  font-family: var(--font-mono);
+}
+
+/* Classes for specific font usage */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+/* Terminal text should always use monospace */
+.terminal-text {
+  font-family: var(--font-mono);
+  font-weight: 500; /* Slightly bolder for better readability */
 }
 
 body {
@@ -52,6 +76,14 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Boot log scrolling animation */
+@keyframes boot-message {
+  0% { opacity: 0; transform: translateY(10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 /* Fade-in animation for desktop */
 @keyframes fade-in {
   0% { opacity: 0; }
@@ -72,6 +104,131 @@ body {
 /* Text shadow for better readability on dark backgrounds */
 .text-shadow {
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.8), 0 0 5px rgba(0, 0, 0, 0.6);
+}
+
+/* Window transition animations */
+@keyframes window-open {
+  from { 
+    opacity: 0; 
+    transform: scale(0.9); 
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@keyframes window-close {
+  from { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  to { 
+    opacity: 0; 
+    transform: scale(0.9); 
+  }
+}
+
+@keyframes window-minimize {
+  from { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+  to { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.95); 
+  }
+}
+
+@keyframes window-restore {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+@keyframes dock-item-hover {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.window-open {
+  animation: window-open 0.2s ease-out forwards;
+}
+
+.window-close {
+  animation: window-close 0.2s ease-in forwards;
+}
+
+.window-minimize {
+  animation: window-minimize 0.2s ease-in forwards;
+}
+
+.window-restore {
+  animation: window-restore 0.2s ease-out forwards;
+}
+
+/* Kali-style dock/taskbar styling */
+.kali-dock {
+  background: linear-gradient(to bottom, #1a1a2e, #0d0d1a);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  padding: 4px 8px;
+  z-index: 50;
+}
+
+.kali-dock-item {
+  background: rgba(30, 30, 46, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.kali-dock-item:hover {
+  background: rgba(54, 123, 240, 0.2);
+  border-color: rgba(54, 123, 240, 0.4);
+  transform: translateY(-3px);
+}
+
+.kali-dock-item.active {
+  background: rgba(54, 123, 240, 0.3);
+  border-color: rgba(54, 123, 240, 0.6);
+  box-shadow: 0 0 5px rgba(54, 123, 240, 0.4);
+}
+
+.kali-dock-item-indicator {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--kali-accent);
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Kali-themed window header gradients */
+.kali-window-header {
+  background: linear-gradient(to right, var(--kali-dark-blue), #2c1e4a);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.kali-window-header-active {
+  background: linear-gradient(to right, #1a3a6e, #3c1f6e);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.kali-terminal-header {
+  background: linear-gradient(to right, #0d0d1a, #1a1a2e);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.2);
 }
 
 .animate-boot-progress {
@@ -97,6 +254,11 @@ body {
 .animate-message {
   opacity: 0;
   animation: fade-in-message 0.3s ease-out forwards;
+}
+
+.animate-boot-message {
+  opacity: 0;
+  animation: boot-message 0.5s ease-out forwards;
 }
 
 .text-kali-green {
@@ -138,6 +300,8 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #444;
 }
+
+/* Terminal styling removed as requested */
 
 /* Terminal flash effect for command feedback */
 @keyframes terminal-flash {

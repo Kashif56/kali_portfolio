@@ -3,6 +3,8 @@ import projects from '../data/projects';
 import experiences from '../data/experience';
 import personalInfo from '../data/personal';
 
+// No syntax highlighting function needed
+
 const Terminal = ({ onCommandExecute }) => {
   const [input, setInput] = useState('');
   const [history, setHistory] = useState([
@@ -339,7 +341,7 @@ const Terminal = ({ onCommandExecute }) => {
   return (
     <div 
       ref={terminalRef}
-      className="flex-1 p-4 overflow-y-auto font-mono text-sm text-kali-green bg-black h-full relative"
+      className="flex-1 p-4 overflow-y-auto terminal-text text-sm text-kali-green bg-black h-full relative"
     >
       {/* Kali Linux watermark */}
       <div className="absolute bottom-4 right-4 opacity-10 pointer-events-none">
