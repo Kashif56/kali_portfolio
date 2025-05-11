@@ -1,0 +1,22 @@
+Full Stack Web Developer and AI Agent Builder | CleaningBiz AI
+ 
+January 2025 - Present
+
+CleaningBiz AI is a smart automation platform built for cleaning businesses, offering AI-powered voice and SMS agents to handle customer communication, bookings, and follow-ups. Using tools like Retell, Vapi, and LangChain, it provides 24/7 support via intelligent agents that respond to inquiries, schedule services, and send automated SMS follow-ups. The system also features sentiment analysis, a live AI chatbot, and a client dashboard for tracking performance and interactions. Built with Django, React.js, and integrated webhooks, CleaningBiz AI helps service providers boost customer engagement and never miss a lead.
+less
+Full Stack Web Developer | Fiverr - Freelance
+ 
+July 2023 - Present
+
+As a freelance Full Stack Web Developer on Fiverr, I’ve completed 20+ projects for clients worldwide, delivering scalable and user-focused web solutions. My work spans developing full-stack applications, RESTful APIs, admin panels, and automation tools using Django, React.js, and JavaScript. I also specialize in building AI agents and chatbots using LangChain, Retell, and Vapi, helping businesses automate communication and enhance customer engagement.
+less
+Junior Web Developer | Pakistan Tobacco Company
+ 
+July 2024 - November 2024
+
+Assisted in Development of a web-based application to track internal purchase orders (POs),
+expenses, and vendor information, improving internal reporting efficiency.
+ Implemented Python and Django for backend services, and React,js for frontend, ensuring
+robust data management and security for sensitive financial records.
+ Utilized MySQL database for efficient storage and retrieval of data, ensuring system
+scalability.
