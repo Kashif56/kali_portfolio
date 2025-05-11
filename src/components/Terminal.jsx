@@ -190,14 +190,7 @@ const Terminal = ({ onCommandExecute }) => {
     // audio.volume = 0.2;
     // audio.play().catch(e => console.log('Audio play error:', e));
     
-    // Visual feedback instead of sound
-    const terminalEl = terminalRef.current;
-    if (terminalEl) {
-      terminalEl.classList.add('terminal-flash');
-      setTimeout(() => {
-        terminalEl.classList.remove('terminal-flash');
-      }, 100);
-    }
+    // Removed visual flash feedback
     
     // Parse command
     switch (cmd) {
