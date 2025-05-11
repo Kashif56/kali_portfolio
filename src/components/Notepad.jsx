@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import ImageLoader from './ImageLoader';
+import './ImageLoader.css';
 
 const Notepad = ({ file, onClose }) => {
   if (!file) return null;
@@ -181,16 +183,35 @@ const Notepad = ({ file, onClose }) => {
 const ImageCarousel = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFullscreen, setShowFullscreen] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState({});
+  
+  // Track which images have been loaded
+  useEffect(() => {
+    const initialLoadState = {};
+    if (images) {
+      images.forEach((_, index) => {
+        initialLoadState[index] = false;
+      });
+    }
+    setImagesLoaded(initialLoadState);
+  }, [images]);
+  
+  const handleImageLoad = (index) => {
+    setImagesLoaded(prev => ({
+      ...prev,
+      [index]: true
+    }));
+  };
   
   const goToPrevious = (e) => {
-    if (e) e.stopPropagation(); // Prevent triggering parent click events
+    e.stopPropagation();
     const isFirstSlide = currentIndex === 0;
     const newIndex = isFirstSlide ? images.length - 1 : currentIndex - 1;
     setCurrentIndex(newIndex);
   };
   
   const goToNext = (e) => {
-    if (e) e.stopPropagation(); // Prevent triggering parent click events
+    e.stopPropagation();
     const isLastSlide = currentIndex === images.length - 1;
     const newIndex = isLastSlide ? 0 : currentIndex + 1;
     setCurrentIndex(newIndex);
@@ -213,10 +234,11 @@ const ImageCarousel = ({ images }) => {
           className="relative h-[400px] w-full overflow-hidden rounded border border-[#313244] cursor-pointer"
           onClick={toggleFullscreen}
         >
-          <img 
-            src={images[currentIndex]} 
+          <ImageLoader
+            src={images[currentIndex]}
             alt={`Slide ${currentIndex + 1}`}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain image-fade-in"
+            onLoad={() => handleImageLoad(currentIndex)}
           />
           
           {/* Fullscreen hint */}
@@ -265,10 +287,11 @@ const ImageCarousel = ({ images }) => {
           onClick={toggleFullscreen}
         >
           <div className="relative max-w-[90vw] max-h-[90vh]">
-            <img 
-              src={images[currentIndex]} 
+            <ImageLoader
+              src={images[currentIndex]}
               alt={`Fullscreen ${currentIndex + 1}`}
-              className="max-w-full max-h-[90vh] object-contain"
+              className="max-w-full max-h-[90vh] object-contain image-fade-in"
+              onLoad={() => handleImageLoad(currentIndex)}
             />
             
             {/* Close button */}

@@ -1,14 +1,32 @@
 import { useState, useEffect } from 'react'
 import Desktop from './components/Desktop'
 import kaliLogo from './assets/kali-1.svg'
+import ImagePreloader from './components/ImagePreloader'
+import projects from './data/projects'
 
 function App() {
   // Loading state for initial animation
   const [loading, setLoading] = useState(true)
   // State to control fade-in animation
   const [fadeIn, setFadeIn] = useState(false)
+  // Collect all project images for preloading
+  const [allImages, setAllImages] = useState([])
 
   useEffect(() => {
+    // Collect all images from projects for preloading
+    const projectImages = [];
+    projects.forEach(project => {
+      if (project.image) {
+        projectImages.push(project.image);
+      }
+      if (project.images && Array.isArray(project.images)) {
+        project.images.forEach(img => {
+          if (img) projectImages.push(img);
+        });
+      }
+    });
+    setAllImages(projectImages);
+
     // Simulate boot sequence
     const timer = setTimeout(() => {
       setLoading(false)
@@ -21,6 +39,8 @@ function App() {
 
   return (
     <div className="w-full h-screen overflow-hidden bg-black">
+      {/* Preload all project images */}
+      <ImagePreloader images={allImages} />
       {loading ? (
         <div className="w-full h-full flex flex-col items-center justify-center bg-black">
           {/* Kali Linux Logo */}

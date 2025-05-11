@@ -1,0 +1,114 @@
+/* Terminal Loader Styles */
+.terminal-loader {
+  width: 300px;
+  background-color: #1e1e2e;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  font-family: monospace;
+}
+
+.terminal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #181825;
+  border-bottom: 1px solid #313244;
+}
+
+.terminal-title {
+  color: #cdd6f4;
+  font-size: 14px;
+}
+
+.terminal-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.control {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.close {
+  background-color: #f38ba8;
+}
+
+.minimize {
+  background-color: #f9e2af;
+}
+
+.maximize {
+  background-color: #a6e3a1;
+}
+
+.terminal-body {
+  padding: 12px;
+  height: 100px;
+  background-color: #11111b;
+}
+
+.terminal-content {
+  height: 100%;
+  overflow: hidden;
+}
+
+.loading-text {
+  display: flex;
+  align-items: center;
+  color: #cdd6f4;
+  font-size: 14px;
+}
+
+.command {
+  color: #89b4fa;
+  margin-left: 4px;
+}
+
+.dots {
+  display: inline-flex;
+  margin-left: 4px;
+}
+
+.dots span {
+  color: #00ff00;
+  animation: blink 1.4s infinite;
+  animation-fill-mode: both;
+}
+
+.dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Fade-in animation for images */
+.image-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
