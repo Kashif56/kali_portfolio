@@ -3,6 +3,7 @@ import Desktop from './components/Desktop'
 import kaliLogo from './assets/kali-1.svg'
 import ImagePreloader from './components/ImagePreloader'
 import projects from './data/projects'
+import bgWallpaper from './assets/Kali-bg-custom.png'
 
 function App() {
   // Loading state for initial animation
@@ -15,6 +16,10 @@ function App() {
   const [bootMessages, setBootMessages] = useState([])
   // Reference for auto-scrolling boot log
   const bootLogRef = useRef(null)
+  // Track background image loading
+  const [bgImageLoaded, setBgImageLoaded] = useState(false)
+  // Track boot sequence completion
+  const [bootSequenceComplete, setBootSequenceComplete] = useState(false)
 
   useEffect(() => {
     // Collect all images from projects for preloading
@@ -29,7 +34,22 @@ function App() {
         });
       }
     });
+    
+    // Add background wallpaper to preload list
+    projectImages.push(bgWallpaper);
     setAllImages(projectImages);
+    
+    // Preload background image specifically
+    const bgImg = new Image();
+    bgImg.onload = () => {
+      console.log('Background image loaded');
+      setBgImageLoaded(true);
+    };
+    bgImg.onerror = () => {
+      console.error('Failed to load background image');
+      setBgImageLoaded(true); // Still mark as loaded to prevent getting stuck
+    };
+    bgImg.src = bgWallpaper;
 
     // Generate authentic Kali Linux boot messages
     const kaliBootMessages = [
@@ -63,11 +83,10 @@ function App() {
           bootLogRef.current.scrollTop = bootLogRef.current.scrollHeight;
         }
         
-        // Complete boot sequence after all messages are displayed
+        // Mark boot sequence as complete after all messages are displayed
         if (index === kaliBootMessages.length - 1) {
           setTimeout(() => {
-            setLoading(false);
-            setFadeIn(true);
+            setBootSequenceComplete(true);
           }, 600);
         }
       }, message.delay);
@@ -83,6 +102,14 @@ function App() {
     
     return () => clearTimeout(timer)
   }, [])
+  
+  // Effect to handle transition to desktop when both boot sequence and background image are ready
+  useEffect(() => {
+    if (bootSequenceComplete && bgImageLoaded) {
+      setLoading(false);
+      setFadeIn(true);
+    }
+  }, [bootSequenceComplete, bgImageLoaded])
 
   return (
     <div className="w-full h-screen overflow-hidden bg-black">
