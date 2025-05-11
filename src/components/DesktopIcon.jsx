@@ -1,5 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ContextMenu from './ContextMenu';
+import { FaFolder, FaBriefcase, FaUser, FaEnvelope } from 'react-icons/fa';
+
+// Function to get the appropriate icon component based on icon ID
+const getIconComponent = (iconId) => {
+  switch(iconId) {
+    case 'projects':
+      return <FaFolder className="w-10 h-10 text-[#367bf0]" />;
+    case 'experience':
+      return <FaBriefcase className="w-10 h-10 text-[#9b59b6]" />;
+    case 'about':
+      return <FaUser className="w-10 h-10 text-[#2ecc71]" />;
+    case 'contact':
+      return <FaEnvelope className="w-10 h-10 text-[#e74c3c]" />;
+    default:
+      return <FaFolder className="w-10 h-10 text-[#367bf0]" />;
+  }
+};
 
 const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor = "#2c3e50", id, onPositionChange }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -177,15 +194,11 @@ const DesktopIcon = ({ icon, label, onClick, position = { x: 0, y: 0 }, bgColor 
         onContextMenu={handleContextMenu}
       >
       <div 
-        className="flex items-center justify-center w-12 h-12 mb-2 text-white rounded-md shadow-lg group-hover:shadow-xl"
-        style={{ 
-          backgroundColor: bgColor,
-          boxShadow: `0 4px 6px rgba(0, 0, 0, 0.3), 0 0 10px ${bgColor}40`
-        }}
+        className="flex items-center justify-center w-12 h-12 mb-0.5 text-white group-hover:opacity-90"
       >
-        {icon}
+        {typeof icon === 'string' ? getIconComponent(id) : icon}
       </div>
-      <span className="text-xs font-mono text-center text-white px-2 py-1 text-shadow">
+      <span className="text-xs font-mono text-center text-white px-2 py-0.5 text-shadow">
         {label}
       </span>
       </div>

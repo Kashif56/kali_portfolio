@@ -857,30 +857,26 @@ const Desktop = () => {
     { 
       id: 'projects', 
       label: 'Projects', 
-      icon: <FolderIcon />, 
-      position: iconPositions['projects'] || defaultIconPositions['projects'],
-      bgColor: '#3498db' // Blue
+      icon: 'projects', // Will be rendered by getIconComponent in DesktopIcon
+      position: iconPositions['projects'] || defaultIconPositions['projects']
     },
     { 
       id: 'experience', 
       label: 'Experience', 
-      icon: <BriefcaseIcon />, 
-      position: iconPositions['experience'] || defaultIconPositions['experience'],
-      bgColor: '#9b59b6' // Purple
+      icon: 'experience', 
+      position: iconPositions['experience'] || defaultIconPositions['experience']
     },
     { 
       id: 'about', 
       label: 'About', 
-      icon: <UserIcon />, 
-      position: iconPositions['about'] || defaultIconPositions['about'],
-      bgColor: '#2ecc71' // Green
+      icon: 'about', 
+      position: iconPositions['about'] || defaultIconPositions['about']
     },
     { 
       id: 'contact', 
       label: 'Contact', 
-      icon: <EnvelopeIcon />, 
-      position: iconPositions['contact'] || defaultIconPositions['contact'],
-      bgColor: '#e74c3c' // Red
+      icon: 'contact', 
+      position: iconPositions['contact'] || defaultIconPositions['contact']
     }
   ];
 
