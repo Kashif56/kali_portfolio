@@ -5,6 +5,7 @@ import ImagePreloader from './components/ImagePreloader'
 import projects from './data/projects'
 import bgWallpaper from './assets/Kali-bg-custom.png'
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/react"
 
 function App() {
   // Loading state for initial animation
@@ -176,6 +177,7 @@ function App() {
         </div>
       )}
       <Analytics />
+      <SpeedInsights />
     </div>
   )
 }
