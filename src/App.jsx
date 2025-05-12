@@ -4,6 +4,7 @@ import kaliLogo from './assets/kali-1.svg'
 import ImagePreloader from './components/ImagePreloader'
 import projects from './data/projects'
 import bgWallpaper from './assets/Kali-bg-custom.png'
+import { Analytics } from "@vercel/analytics/react"
 
 function App() {
   // Loading state for initial animation
@@ -174,6 +175,7 @@ function App() {
           <Desktop />
         </div>
       )}
+      <Analytics />
     </div>
   )
 }
