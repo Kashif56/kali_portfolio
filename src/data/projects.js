@@ -28,7 +28,7 @@ const projects = [
     title: 'Nexus AI',
     description: 'Nexus AI is a full-stack Django application that enables businesses to deploy AI-powered chatbots capable of answering questions using their own documents. Leveraging Retrieval-Augmented Generation (RAG), the system integrates with web, SMS, WhatsApp, and email channels, while offering a powerful analytics dashboard to track user engagement and performance.',
     technologies: ['Python', 'Django', 'PostgreSQL', 'Pinecone', 'Langchain', 'OpenAI', 'Google Gemini', 'Django Q2', 'Twilio', 'GMail API', 'META APIs'],
-    link: 'https://github.com/kashif56/nexus_ai',
+    link: 'https://nexusai.up.railway.app',
     image: nexusAiThumbnail,
     images: [
       nexusAiThumbnail,
@@ -101,7 +101,7 @@ const projects = [
     title: 'eBank',
     description: 'The Custom Banking Website is a comprehensive online banking system built with Django, offering secure account management, money transactions, and service requests. Key features include OTP verification for secure operations, virtual card issuance with customizable limits, and detailed financial management tools.',
     technologies: ['JavaScript', 'Django', 'PostgreSQL', 'Bootstrap', 'HTML', 'CSS'],
-    link: 'https://github.com/username/ebank',
+    link: 'https://github.com/kashif56/ebank',
     image: 'https://www.upwork.com/att/download/portfolio/persons/uid/1295795356457041920/profile/projects/files/a4d33fb9-e71d-4f5f-861b-a627c505fee1', // Using Services AI image as placeholder
     images: [
      'https://www.upwork.com/att/download/portfolio/persons/uid/1295795356457041920/profile/projects/files/a4d33fb9-e71d-4f5f-861b-a627c505fee1'
@@ -113,7 +113,7 @@ const projects = [
     title: 'SkillNet',
     description: 'Skillnet is an innovative platform designed to connect individuals looking to exchange skills and knowledge. Whether you\'re a developer wanting to learn graphic design or a marketer looking to pick up coding, SkillSwap provides a seamless way to barter expertise with like-minded professionals.',
     technologies: ['React', 'Redux', 'Tailwind CSS', 'Django REST Framework', 'PostgreSQL', 'Django Channels', 'Web Sockets', 'HTML', 'CSS'],
-    link: 'https://github.com/username/skillnet',
+    link: 'https://skillnet.up.railway.app',
     image: 'https://www.upwork.com/att/download/portfolio/persons/uid/1295795356457041920/profile/projects/files/319b11e1-2544-4d98-b61c-5602b8ff3f70',
     images: [
       'https://www.upwork.com/att/download/portfolio/persons/uid/1295795356457041920/profile/projects/files/319b11e1-2544-4d98-b61c-5602b8ff3f70',
@@ -130,7 +130,7 @@ const projects = [
     title: 'InstaSync',
     description: 'InstaSync is a powerful Instagram post scheduling platform designed to help creators, businesses, and social media managers automate their content effortlessly. With an intuitive interface, users can plan, schedule, and auto-publish posts, reels, and stories with ease.',
     technologies: ['React', 'Redux', 'Tailwind CSS', 'Django REST Framework', 'PostgreSQL', 'Django-Q2', 'Instagram API', 'HTML', 'CSS'],
-    link: 'https://github.com/username/instasync',
+    link: 'https://instasync.up.railway.app',
     image: 'https://www.upwork.com/att/download/portfolio/persons/uid/1295795356457041920/profile/projects/files/f160642b-5bf9-4a60-a868-37c749dd9cdf',
     images: [
       'https://www.upwork.com/att/download/portfolio/persons/uid/1295795356457041920/profile/projects/files/f160642b-5bf9-4a60-a868-37c749dd9cdf',
@@ -143,7 +143,7 @@ const projects = [
     title: 'Avante Salon',
     description: 'The Salon Management System was designed to streamline salon operations by managing staff attendance, appointments, and expenses. Built with Django, it features a user-friendly interface for tracking staff schedules and client bookings.',
     technologies: ['JavaScript', 'Django', 'SQLite', 'Bootstrap', 'HTML', 'CSS'],
-    link: 'https://github.com/username/avante-salon',
+    link: 'https://github.com/kashif56/saloon_management/',
     image: 'https://www.upwork.com/att/download/portfolio/persons/uid/1295795356457041920/profile/projects/files/1240a669-8918-4f6d-8997-e947cd65165a',
     images: [
       'https://www.upwork.com/att/download/portfolio/persons/uid/1295795356457041920/profile/projects/files/1240a669-8918-4f6d-8997-e947cd65165a',

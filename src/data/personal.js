@@ -8,7 +8,7 @@ In addition to my web development expertise, I specialize in building RAG powere
 
 I also have extensive experience in workflow automation using platforms like Make.com, Zapier, and other automation tools to streamline business processes, integrate multiple systems, and save time on repetitive tasks.`,
   location: 'Pakistan',
-  email: 'kashif.mehmood@example.com',
+  email: 'kashifmehmood926@gmail.com',
   
   // Highlights
   highlights: [
@@ -62,7 +62,7 @@ I also have extensive experience in workflow automation using platforms like Mak
       name: 'Upwork',
       url: 'https://www.upwork.com/freelancers/~01b32b61468866942c?mp_source=share',
       rating: '5.0',
-      jobsCompleted: 5
+      jobsCompleted: 1
     },
     {
       name: 'Fiverr',
@@ -75,8 +75,8 @@ I also have extensive experience in workflow automation using platforms like Mak
   education: [
     {
       degree: 'Bachelor of Science in Computer Science',
-      institution: 'University of Computer Science & Technology',
-      year: '2017 - 2021',
+      institution: 'Virtual University of Pakistan',
+      year: '2022 - 2027',
     }
   ],
 };
