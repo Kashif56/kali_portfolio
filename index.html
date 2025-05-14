@@ -24,5 +24,15 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script src="https://nexusai-widget.vercel.app/chatbot-widget.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        ChatbotWidget.init({
+          chatbot_id: '9d366909-7b37-4ae6-aff4-46b5b81068ab',        // Required: Your business ID
+          botName: "Kashif's Assistant",              // Required: Name of your chatbot assistant
+          initialMessage: 'Hi there! How can I help you today?', // Required: 
+        });
+      });
+    </script>
   </body>
 </html>
